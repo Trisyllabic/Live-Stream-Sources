@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Liga Scoreboard A</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="transparent-canvas">
+  <main class="overlay-wrap">
+    <section class="scoreboard score-a" data-scoreboard>
+      <div class="league-strip" data-league>SPANISH LA LIGA</div>
+      <div class="teams-row">
+        <div class="team-side left" data-home-side>
+          <div class="logo-bubble">
+            <img data-home-logo src="assets/logos/bar.png" alt="Home Team Logo" />
+          </div>
+          <span class="team-code" data-home-code>BAR</span>
+        </div>
+
+        <div class="center-score">
+          <div class="score-box"><span data-home-score>0</span> - <span data-away-score>0</span></div>
+          <div class="time-wrap">
+            <div class="time-box" data-time>00:00</div>
+            <div class="phase-badge" data-phase></div>
+          </div>
+        </div>
+
+        <div class="team-side right" data-away-side>
+          <span class="team-code" data-away-code>VIL</span>
+          <div class="logo-bubble">
+            <img data-away-logo src="assets/logos/vil.png" alt="Away Team Logo" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-panel" data-controls>
+      <h2>Match Controls</h2>
+      <div class="controls-grid">
+        <button type="button" data-action="kickoff">Kickoff</button>
+        <button type="button" data-action="secondHalf">2nd Half</button>
+        <button type="button" data-action="startPause">Start</button>
+        <button type="button" data-action="scoreReset">Score Reset</button>
+        <button type="button" data-action="homeGoal">Home Goal +1</button>
+        <button type="button" data-action="awayGoal">Away Goal +1</button>
+        <button type="button" data-action="minusMinute">-1 Min</button>
+        <button type="button" data-action="plusMinute">+1 Min</button>
+        <button type="button" data-action="ht">HT</button>
+        <button type="button" data-action="ft">FT</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="scoreboard.js"></script>
+</body>
+</html>
