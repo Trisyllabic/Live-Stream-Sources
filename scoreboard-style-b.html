@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Liga Scoreboard B</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="transparent-canvas">
+  <main class="overlay-wrap">
+    <section class="scoreboard score-b" data-scoreboard>
+      <div class="accent-line"></div>
+      <div class="pill-shell">
+        <div class="logo-bubble lifted">
+          <img data-home-logo src="assets/logos/barcelona.png" alt="Home Team Logo" />
+        </div>
+
+        <div class="score-core">
+          <div class="score-main"><span data-home-score>2</span> - <span data-away-score>0</span></div>
+          <div class="meta-row">
+            <span data-home-code>FCB</span>
+            <span class="match-time" data-time>45:00</span>
+            <span data-away-code>VIL</span>
+          </div>
+        </div>
+
+        <div class="logo-bubble lifted">
+          <img data-away-logo src="assets/logos/villarreal.png" alt="Away Team Logo" />
+        </div>
+      </div>
+      <div class="accent-line"></div>
+    </section>
+  </main>
+
+  <script src="scoreboard.js"></script>
+</body>
+</html>
