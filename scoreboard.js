@@ -72,7 +72,7 @@
       return '90:00+';
     }
 
-    if (totalSeconds = 45 * 60) {
+    if (totalSeconds > 45 * 60) {
       return '45:00+';
     }
 
