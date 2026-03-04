@@ -174,18 +174,20 @@
         state.homeScore = 0;
         state.awayScore = 0;
         state.elapsedSeconds = 0;
-        state.phase = 'KO';
+        state.half = 1;
+        state.phase = '';
         state.running = false;
         break;
       case 'secondHalf':
         state.elapsedSeconds = 45 * 60;
-        state.phase = '2H';
+        state.half = 2;
+        state.phase = '';
         state.running = false;
         break;
       case 'startPause':
         state.running = !state.running;
-        if (state.running) {
-          state.phase = state.phase === 'HT' || state.phase === 'FT' ? '' : state.phase;
+        if (state.running && (state.phase === 'HT' || state.phase === 'FT')) {
+          state.phase = '';
         }
         break;
       case 'scoreReset':
