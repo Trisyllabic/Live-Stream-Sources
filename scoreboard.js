@@ -25,8 +25,8 @@
   };
 
   const legacyLogoMap = {
-    BAR: 'assets/logos/barcelona.png',
-    VIL: 'assets/logos/villarreal.png'
+    BAR: 'assets/logos/bar.png',
+    VIL: 'assets/logos/vil.png'
   };
 
   function getInitialText(selector, fallback) {
