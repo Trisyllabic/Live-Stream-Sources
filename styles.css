@@ -24,7 +24,7 @@ body {
   padding: 24px;
 }
 
-.overlay-wrap {
+overlay-wrap {
   width: min(100%, 820px);
 }
 
@@ -143,6 +143,11 @@ body {
 
 .phase-badge:empty {
   display: none;
+}
+
+[data-home-side],
+[data-away-side] {
+  margin-top: -20px;
 }
 
 .control-panel {
