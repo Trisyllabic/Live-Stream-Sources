@@ -22,7 +22,11 @@
     SEV: '#e83a45',
     VAL: '#f2a900',
     VIL: '#ffe35a'
+  };
 
+  const legacyLogoMap = {
+    BAR: 'assets/logos/bar.png',
+    VIL: 'assets/logos/vil.png'
   };
 
   function getInitialText(selector, fallback) {
