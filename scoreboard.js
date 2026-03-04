@@ -22,11 +22,7 @@
     SEV: '#e83a45',
     VAL: '#f2a900',
     VIL: '#ffe35a'
-  };
 
-  const legacyLogoMap = {
-    BAR: 'assets/logos/bar.png',
-    VIL: 'assets/logos/vil.png'
   };
 
   function getInitialText(selector, fallback) {
@@ -42,6 +38,7 @@
     homeScore: Number.parseInt(params.get('homeScore') || getInitialText('[data-home-score]', '0'), 10) || 0,
     awayScore: Number.parseInt(params.get('awayScore') || getInitialText('[data-away-score]', '0'), 10) || 0,
     elapsedSeconds: parseTimeToSeconds(params.get('time') || getInitialText('[data-time]', '00:00')),
+    half: params.get('half') === '2' ? 2 : 1,
     phase: '',
     running: false
   };
@@ -68,11 +65,11 @@
   }
 
   function formatClock(totalSeconds) {
-    if (totalSeconds >= 90 * 60) {
+    if (state.half === 2 && totalSeconds > 90 * 60) {
       return '90:00+';
     }
 
-    if (totalSeconds > 45 * 60) {
+    if (state.half === 1 && totalSeconds >= 45 * 60) {
       return '45:00+';
     }
 
