@@ -123,8 +123,24 @@
     setText('[data-away-code]', state.awayCode);
     setText('[data-home-score]', String(state.homeScore));
     setText('[data-away-score]', String(state.awayScore));
-    setText('[data-time]', formatClock(state.elapsedSeconds));
-    setText('[data-phase]', state.phase);
+    
+    // Handle time display: show HT/FT in the timer box, hide phase badge for KO/2H
+    if (state.phase === 'HT' || state.phase === 'FT') {
+      setText('[data-time]', state.phase);
+    } else {
+      setText('[data-time]', formatClock(state.elapsedSeconds));
+    }
+    
+    // Hide phase badge for KO and 2H phases (no structural shift)
+    const phaseElement = document.querySelectorAll('[data-phase]');
+    phaseElement.forEach((node) => {
+      if (state.phase === 'KO' || state.phase === '2H') {
+        node.style.visibility = 'hidden';  
+      } else {
+        node.style.visibility = 'visible';
+        setText(node, state.phase === 'HT' || state.phase === 'FT' ? '' : state.phase);
+      }
+    });
 
     const startPauseButton = document.querySelector('[data-action="startPause"]');
     if (startPauseButton) {
