@@ -45,6 +45,8 @@
     RSO: 'assets/logos/rso.png',
     SEV: 'assets/logos/sevilla.png',
     VAL: 'assets/logos/valencia.png',
+      return legacyLogoMap[normalized] || `assets/logos/${normalized.toLowerCase()}.png`;
+
   };
 
   function getInitialText(selector, fallback) {
