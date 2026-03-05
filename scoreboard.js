@@ -55,16 +55,22 @@
     return value || fallback;
   }
 
-  const initialState = {
-    homeCode: (params.get('home') || getInitialText('[data-home-code]', 'BAR')).toUpperCase(),
-    awayCode: (params.get('away') || getInitialText('[data-away-code]', 'RMA')).toUpperCase(),
-    homeScore: Number.parseInt(params.get('homeScore') || getInitialText('[data-home-score]', '0'), 10) || 0,
-    awayScore: Number.parseInt(params.get('awayScore') || getInitialText('[data-away-score]', '0'), 10) || 0,
-    elapsedSeconds: parseTimeToSeconds(params.get('time') || getInitialText('[data-time]', '00:00')),
-    half: params.get('half') === '2' ? 2 : 1,
-    phase: '',
-    running: false
-  };
+  function getTeamCode(selector) {
+  const el = document.querySelector(selector);
+  if (!el) return '';
+  return (el.dataset.team || el.textContent).trim().toUpperCase();
+}
+
+const state = {
+  homeCode: getTeamCode('[data-home-code]'),
+  awayCode: getTeamCode('[data-away-code]'),
+  homeScore: 0,
+  awayScore: 0,
+  elapsedSeconds: 0,
+  half: 1,
+  phase: '',
+  running: false
+};
 
   const state = { ...initialState };
   let timerId = null;
@@ -127,15 +133,27 @@
   }
 
   function updateLogos() {
-    setImage('[data-home-logo]', resolveLogo(state.homeCode, 'homeLogo'));
-    setImage('[data-away-logo]', resolveLogo(state.awayCode, 'awayLogo'));
+  const homeLogo = document.querySelector('[data-home-logo]');
+  const awayLogo = document.querySelector('[data-away-logo]');
+
+  if (homeLogo) {
+    homeLogo.src = `assets/logos/${state.homeCode.toLowerCase()}.png`;
   }
 
-  function setTeamColors() {
-    const root = document.documentElement;
-    root.style.setProperty('--home-color', teamPalette[state.homeCode] || '#f4f6ff');
-    root.style.setProperty('--away-color', teamPalette[state.awayCode] || '#f4f6ff');
+  if (awayLogo) {
+    awayLogo.src = `assets/logos/${state.awayCode.toLowerCase()}.png`;
   }
+}
+
+  function setTeamColors() {
+  const root = document.documentElement;
+
+  const homeColor = teamPalette[state.homeCode] || '#ffffff';
+  const awayColor = teamPalette[state.awayCode] || '#ffffff';
+
+  root.style.setProperty('--home-color', homeColor);
+  root.style.setProperty('--away-color', awayColor);
+}
 
   function render() {
     setText('[data-league]', params.get('league') || 'SPANISH LA LIGA');
