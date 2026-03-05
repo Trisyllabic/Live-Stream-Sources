@@ -27,6 +27,24 @@
   const legacyLogoMap = {
     BAR: 'assets/logos/bar.png',
     VIL: 'assets/logos/vil.png'
+    ALA: 'assets/logos/deportivo-alaves.png',
+    ATH: 'assets/logos/ath.png',
+    ATM: 'assets/logos/atletico-madrid.png',
+    CEL: 'assets/logos/celta-vigo.png',
+    ELC: 'assets/logos/elc.png',
+    ESP: 'assets/logos/rcd-espanyol.png',
+    GET: 'assets/logos/getafe.png',
+    GIR: 'assets/logos/gir.png',
+    LEV: 'assets/logos/lev.png',
+    OSA: 'assets/logos/osasuna.png',
+    RAY: 'assets/logos/rayo-vallecano.png',
+    MLL: 'assets/logos/mll.png',
+    BET: 'assets/logos/real-betis.png',
+    RMA: 'assets/logos/rma.png',
+    OVI: 'assets/logos/bar.png',
+    RSO: 'assets/logos/rso.png',
+    SEV: 'assets/logos/sevilla.png',
+    VAL: 'assets/logos/valencia.png',
   };
 
   function getInitialText(selector, fallback) {
