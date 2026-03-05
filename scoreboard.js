@@ -72,7 +72,6 @@ const state = {
   running: false
 };
 
-  const state = { ...initialState };
   let timerId = null;
 
   function parseTimeToSeconds(value) {
