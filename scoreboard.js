@@ -57,7 +57,7 @@
 
   const initialState = {
     homeCode: (params.get('home') || getInitialText('[data-home-code]', 'BAR')).toUpperCase(),
-    awayCode: (params.get('away') || getInitialText('[data-away-code]', 'VIL')).toUpperCase(),
+    awayCode: (params.get('away') || getInitialText('[data-away-code]', 'RMA')).toUpperCase(),
     homeScore: Number.parseInt(params.get('homeScore') || getInitialText('[data-home-score]', '0'), 10) || 0,
     awayScore: Number.parseInt(params.get('awayScore') || getInitialText('[data-away-score]', '0'), 10) || 0,
     elapsedSeconds: parseTimeToSeconds(params.get('time') || getInitialText('[data-time]', '00:00')),
