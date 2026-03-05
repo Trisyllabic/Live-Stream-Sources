@@ -26,7 +26,7 @@
 
   const legacyLogoMap = {
     BAR: 'assets/logos/bar.png',
-    VIL: 'assets/logos/vil.png'
+    VIL: 'assets/logos/vil.png',
     ALA: 'assets/logos/deportivo-alaves.png',
     ATH: 'assets/logos/ath.png',
     ATM: 'assets/logos/atletico-madrid.png',
@@ -41,11 +41,10 @@
     MLL: 'assets/logos/mll.png',
     BET: 'assets/logos/real-betis.png',
     RMA: 'assets/logos/rma.png',
-    OVI: 'assets/logos/bar.png',
+    OVI: 'assets/logos/ovi.png',
     RSO: 'assets/logos/rso.png',
     SEV: 'assets/logos/sevilla.png',
     VAL: 'assets/logos/valencia.png',
-      return legacyLogoMap[normalized] || `assets/logos/${normalized.toLowerCase()}.png`;
 
   };
 
