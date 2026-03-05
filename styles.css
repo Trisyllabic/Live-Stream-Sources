@@ -24,7 +24,7 @@ body {
   padding: 24px;
 }
 
-overlay-wrap {
+.overlay-wrap {
   width: min(100%, 820px);
 }
 
@@ -96,6 +96,15 @@ overlay-wrap {
 
 [data-away-side] .team-code {
   color: var(--away-color, #f4f6ff);
+}
+/* Apply team colors to logo bubbles */
+
+[data-home-side] .logo-bubble {
+  border: 4px solid var(--home-color, #ffffff);
+}
+
+[data-away-side] .logo-bubble {
+  border: 4px solid var(--away-color, #ffffff);
 }
 
 .center-score {
