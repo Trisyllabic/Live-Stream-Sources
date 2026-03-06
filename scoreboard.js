@@ -155,7 +155,7 @@ const state = {
 }
 
   function render() {
-    setText('[data-league]', params.get('league') || 'SPANISH LA LIGA');
+    setText('[data-league]', params.get('league') || 'LA LIGA');
     setText('[data-home-code]', state.homeCode);
     setText('[data-away-code]', state.awayCode);
     setText('[data-home-score]', String(state.homeScore));
