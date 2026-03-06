@@ -1,7 +1,7 @@
 :root {
   --text: #f4f6ff;
-  --dark: rgba(15, 17, 28, 0.9);
-  --muted: rgba(20, 22, 35, 0.75);
+  --dark: rgba(15, 17, 28, 0.96);
+  --muted: rgba(20, 22, 35, 0.9);
   --light-card: rgba(255, 255, 255, 0.92);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
@@ -50,17 +50,18 @@ body {
 
 /* Style A */
 .score-a {
-  --board-h: 132px;
-  --team-card-h: 112px;
-  --side-card-w: clamp(220px, 26vw, 270px);
-  --center-card-w: clamp(190px, 20vw, 230px);
+  --board-h: 134px;
+  --team-card-h: 120px;
+  --side-card-w: clamp(280px, 32vw, 420px);
+  --center-card-w: clamp(260px, 28vw, 340px);
   --logo-size: 62px;
   --logo-img-size: 44px;
-  --team-code-size: clamp(22px, 3.2vw, 34px);
-  --score-size: clamp(36px, 5.2vw, 56px);
-  --time-size: clamp(20px, 3vw, 28px);
+  --display-size: clamp(48px, 6vw, 70px);
+  --team-code-size: var(--display-size);
+  --score-size: var(--display-size);
+  --time-size: var(--display-size);
   display: grid;
-  gap: 10px;
+  gap: 12px;
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
@@ -90,10 +91,11 @@ body {
 .team-side {
   background: var(--dark);
   border-radius: 16px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
   width: var(--side-card-w);
   min-height: 0;
   height: var(--team-card-h);
@@ -103,7 +105,8 @@ body {
 .team-code {
   font-size: var(--team-code-size);
   font-weight: 900;
-  padding-inline: 10px;
+  line-height: 1;
+  padding-inline: 4px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
@@ -136,49 +139,45 @@ body {
 
 .center-score {
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
   text-align: center;
   width: var(--center-card-w);
+  background: rgba(78, 81, 95, 0.95);
+  border-radius: 30px;
   min-width: 0;
-  height: 100%;
-}
-
-.score-box {
-  font-family: 'Arial Black', Impact, 'Inter Tight', sans-serif;
-  font-size: var(--score-size);
-  font-weight: 900;
-  line-height: 1;
-  background: rgba(0, 0, 0, 0.75);
-  border-radius: 20px 20px 12px 12px;
-  padding: 8px 14px;
+  height: var(--team-card-h);
+  align-self: center;
+  box-shadow: var(--shadow);
 }
 
 .time-wrap {
-  margin-top: 6px;
+  margin-top: 0;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   justify-content: center;
   align-items: center;
 }
 
 .time-box {
-  background: var(--muted);
-  border-radius: 12px;
+  background: transparent;
+  border-radius: 0;
   font-family: 'Inter Tight', 'Arial Black', sans-serif;
   font-size: var(--time-size);
   font-weight: 800;
   letter-spacing: 0.03em;
-  padding: 6px 12px;
+  line-height: 1;
+  padding: 0;
 }
 
 .phase-badge {
-  min-width: 52px;
-  padding: 6px 10px;
+  min-width: 0;
+  padding: 2px 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.22);
   font-weight: 800;
-  font-size: clamp(11px, 1.6vw, 14px);
+  font-size: clamp(10px, 1.2vw, 12px);
   text-transform: uppercase;
 }
 
@@ -189,6 +188,29 @@ body {
 [data-home-side],
 [data-away-side] {
   margin-top: 0;
+}
+
+[data-home-side] .team-code {
+  margin-left: 0;
+}
+
+[data-home-side] .side-score {
+  margin-left: auto;
+}
+
+[data-away-side] .side-score {
+  margin-right: auto;
+}
+
+.side-score {
+  font-family: 'Arial Black', Impact, 'Inter Tight', sans-serif;
+  font-size: var(--score-size);
+  font-weight: 900;
+  line-height: 1;
+  color: #e9eef7;
+  background: rgba(80, 84, 94, 0.88);
+  border-radius: 2px;
+  padding: 4px 10px 6px;
 }
 
 .control-panel {
