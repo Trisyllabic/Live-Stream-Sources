@@ -175,7 +175,7 @@ const state = {
         node.style.visibility = 'hidden';  
       } else {
         node.style.visibility = 'visible';
-        setText(node, state.phase === 'HT' || state.phase === 'FT' ? '' : state.phase);
+        node.textContent = state.phase === 'HT' || state.phase === 'FT' ? '' : state.phase;
       }
     });
 
