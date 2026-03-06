@@ -50,7 +50,7 @@ body {
 
 /* Style A */
 .score-a {
-  --board-h: 160px;
+  --board-h: 132px;
   --side-card-w: clamp(220px, 26vw, 270px);
   --center-card-w: clamp(190px, 20vw, 230px);
   --logo-size: 62px;
