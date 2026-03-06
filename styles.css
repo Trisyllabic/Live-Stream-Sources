@@ -166,9 +166,11 @@ body {
   font-family: 'Inter Tight', 'Arial Black', sans-serif;
   font-size: var(--time-size);
   font-weight: 800;
+  color: #ffffff;
   letter-spacing: 0.03em;
   line-height: 1;
   padding: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .phase-badge {
@@ -207,10 +209,11 @@ body {
   font-size: var(--score-size);
   font-weight: 900;
   line-height: 1;
-  color: #e9eef7;
-  background: rgba(80, 84, 94, 0.88);
-  border-radius: 2px;
-  padding: 4px 10px 6px;
+  color: #d9e2f4;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .control-panel {
