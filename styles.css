@@ -51,8 +51,8 @@ body {
 /* Style A */
 .score-a {
   --board-h: 160px;
-  --side-card-w: clamp(220px, 26vw, 300px);
-  --center-card-w: clamp(210px, 22vw, 250px);
+  --side-card-w: clamp(220px, 26vw, 270px);
+  --center-card-w: clamp(190px, 20vw, 230px);
   --logo-size: 62px;
   --logo-img-size: 44px;
   --team-code-size: clamp(22px, 3.2vw, 34px);
@@ -79,7 +79,7 @@ body {
 
 .teams-row {
   display: grid;
-  grid-template-columns: var(--side-card-w) var(--center-card-w) var(--side-card-w);
+  grid-template-columns: auto auto auto;
   height: var(--board-h);
   align-items: stretch;
   justify-content: center;
@@ -93,6 +93,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: var(--side-card-w);
   min-height: 0;
   height: 100%;
 }
@@ -136,6 +137,7 @@ body {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  width: var(--center-card-w);
   min-width: 0;
   height: 100%;
 }
