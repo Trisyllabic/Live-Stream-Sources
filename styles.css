@@ -138,31 +138,6 @@ body {
   pointer-events: none;
 }
 
-.team-side::after {
-  content: "";
-  position: absolute;
-  top: -16px;
-  bottom: -16px;
-  width: 34px;
-  transform: skewX(-22deg);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 190, 92, 0.95),
-    rgba(255, 118, 35, 0.55) 42%,
-    rgba(255, 98, 0, 0.12) 100%
-  );
-  filter: blur(0.4px);
-  pointer-events: none;
-}
-
-[data-home-side].team-side::after {
-  right: -20px;
-}
-
-[data-away-side].team-side::after {
-  left: -20px;
-}
-
 .team-code {
   font-size: var(--team-code-size);
   font-weight: 900;
@@ -412,10 +387,6 @@ body {
 
   .center-score {
     min-width: auto;
-  }
-
-  .team-side::after {
-    display: none;
   }
 
   .controls-grid {
