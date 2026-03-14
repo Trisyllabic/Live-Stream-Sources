@@ -422,16 +422,29 @@
   //   window.triggerAlert('sub',    'BarçaBelievers', '3 months — gracias!')
   //   window.triggerAlert('bits',   'TragicMinded',   '200 bits — legend!')
   // ── STREAMER.BOT WEBSOCKET CONNECTION ────────────────────────────────────
-  // Connects to Streamer.bot running on the same PC.
-  // Listens for Twitch follow, sub and bits events and fires the alert popup
-  // automatically. Reconnects every 5 seconds if the connection drops.
+  // Only attempts to connect when running locally (inside Streamlabs on your PC).
+  // When viewed directly on GitHub Pages this block is skipped entirely so
+  // window.triggerAlert stays available for manual console testing.
   //
-  // Requirements:
+  // Requirements (local only):
   //   - Streamer.bot must be running
   //   - Servers/Clients → WebSocket Server → must be Started on port 8080
-  //   - No actions or sub-actions needed in Streamer.bot — this listens directly
   //
   (function connectStreamerBot() {
+
+    // Only run when loaded from localhost / 127.0.0.1
+    // GitHub Pages (HTTPS) would block ws:// anyway — skip it cleanly
+    const isLocal = (
+      window.location.hostname === 'localhost'      ||
+      window.location.hostname === '127.0.0.1'      ||
+      window.location.protocol === 'file:'
+    );
+
+    if (!isLocal) {
+      // Not running locally — skip WebSocket, triggerAlert still works fine
+      // for URL param and console testing on GitHub Pages
+      return;
+    }
 
     const SB_URL         = 'ws://127.0.0.1:8080/';
     const RECONNECT_MS   = 5000;
@@ -447,11 +460,15 @@
         ws = null;
       }
 
-      ws = new WebSocket(SB_URL);
+      try {
+        ws = new WebSocket(SB_URL);
+      } catch(e) {
+        // WebSocket constructor failed — retry after delay
+        reconnectTimer = setTimeout(connect, RECONNECT_MS);
+        return;
+      }
 
       ws.onopen = () => {
-        // Subscribe to the Twitch events we care about
-        // Streamer.bot v1.0.4 uses this subscription format
         ws.send(JSON.stringify({
           request: 'Subscribe',
           events: {
@@ -472,11 +489,10 @@
         let data;
         try { data = JSON.parse(event.data); } catch(e) { return; }
 
-        // Streamer.bot wraps events in { event: { source, type }, data: {...} }
         if (!data.event) return;
 
-        const source    = data.event.source; // 'Twitch'
-        const eventType = data.event.type;   // 'Follow', 'Sub', etc.
+        const source    = data.event.source;
+        const eventType = data.event.type;
         const d         = data.data || {};
 
         // ── FOLLOW ──
@@ -485,75 +501,57 @@
           window.triggerAlert('follow', name);
         }
 
-        // ── SUB (new subscription) ──
+        // ── SUB ──
         if (source === 'Twitch' && eventType === 'Sub') {
           const name   = d.user_name || d.userName || d.displayName || 'Subscriber';
           const months = d.cumulativeMonths || d.months || 1;
-          window.triggerAlert(
-            'sub',
-            name,
-            months + ' month' + (months !== 1 ? 's' : '') + ' — gracias!'
-          );
+          window.triggerAlert('sub', name,
+            months + ' month' + (months !== 1 ? 's' : '') + ' — gracias!');
         }
 
         // ── RESUB ──
         if (source === 'Twitch' && eventType === 'ReSub') {
           const name   = d.user_name || d.userName || d.displayName || 'Subscriber';
           const months = d.cumulativeMonths || d.months || 1;
-          window.triggerAlert(
-            'sub',
-            name,
-            months + ' month' + (months !== 1 ? 's' : '') + ' — gracias!'
-          );
+          window.triggerAlert('sub', name,
+            months + ' month' + (months !== 1 ? 's' : '') + ' — gracias!');
         }
 
-        // ── GIFT SUB (single gift) ──
+        // ── GIFT SUB ──
         if (source === 'Twitch' && eventType === 'GiftSub') {
           const gifter   = d.user_name || d.userName || d.displayName || 'Anonymous';
           const receiver = d.recipient_user_name || d.recipientName || '';
-          window.triggerAlert(
-            'sub',
-            gifter,
-            'Gifted a sub' + (receiver ? ' to ' + receiver : '') + '!'
-          );
+          window.triggerAlert('sub', gifter,
+            'Gifted a sub' + (receiver ? ' to ' + receiver : '') + '!');
         }
 
-        // ── GIFT BOMB (multiple gifts at once) ──
+        // ── GIFT BOMB ──
         if (source === 'Twitch' && eventType === 'GiftBomb') {
           const gifter = d.user_name || d.userName || d.displayName || 'Anonymous';
           const count  = d.gifts || d.giftCount || '?';
-          window.triggerAlert(
-            'sub',
-            gifter,
-            'Gifted ' + count + ' subs to the community!'
-          );
+          window.triggerAlert('sub', gifter,
+            'Gifted ' + count + ' subs to the community!');
         }
 
-        // ── BITS / CHEER ──
+        // ── BITS ──
         if (source === 'Twitch' && eventType === 'Cheer') {
           const name   = d.user_name || d.userName || d.displayName || 'Cheerer';
           const amount = d.bits || d.amount || '?';
-          window.triggerAlert(
-            'bits',
-            name,
-            amount + ' bits — absolute legend!'
-          );
+          window.triggerAlert('bits', name,
+            amount + ' bits — absolute legend!');
         }
       };
 
       ws.onclose = () => {
-        // Auto-reconnect after 5 seconds
         if (reconnectTimer) clearTimeout(reconnectTimer);
         reconnectTimer = setTimeout(connect, RECONNECT_MS);
       };
 
       ws.onerror = () => {
         // onerror always fires before onclose — let onclose handle reconnect
-        // Silent fail so no console spam when Streamer.bot isn't running yet
       };
     }
 
-    // Kick off the initial connection
     connect();
 
   })();
