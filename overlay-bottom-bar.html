@@ -541,7 +541,20 @@
         break;
       }
 
-      // Match phase changes — swap the active prompt set to match context
+      // Alert events re-broadcast from overlay-alerts.html
+      // These populate the ticker with real follow/sub/bits activity
+      case 'alert_follow':
+        prependTicker(data.alertName, 'follow', 'FOLLOW', '');
+        setFollowCount(followCount + 1);
+        break;
+
+      case 'alert_sub':
+        prependTicker(data.alertName, 'sub', 'SUB', data.alertExtra);
+        break;
+
+      case 'alert_bits':
+        prependTicker(data.alertName, 'cheer', 'BITS', data.alertExtra);
+        break;
       case 'kickoff':
         showPrompt(0); // reset to first prompt on kickoff
         break;
