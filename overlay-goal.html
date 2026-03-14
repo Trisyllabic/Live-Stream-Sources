@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Barca — Goal Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Transparent body — only the overlay card is visible in Streamlabs */
+  body {
+    background: transparent;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+  }
+
+  /* ── FULL SCREEN DIMMER ── */
+  .goal-dimmer {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    transition: background 0.35s ease;
+  }
+  .goal-dimmer.show {
+    background: rgba(0, 0, 0, 0.42);
+  }
+
+  /* ── GOAL CARD — centred ── */
+  .goal-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0) rotate(-6deg);
+    opacity: 0;
+    transition:
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity   0.4s  cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    text-align: center;
+  }
+  .goal-card.show {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  /* ── BADGE ── */
+  .goal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    background: rgba(5, 8, 15, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 28px 48px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 80px rgba(0, 78, 152, 0.45),
+      0 0 140px rgba(163, 0, 50, 0.28),
+      0 24px 60px rgba(0, 0, 0, 0.7);
+    min-width: 560px;
+  }
+
+  /* Brand split top bar */
+  .goal-badge::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      #004E98 0%, #004E98 49.8%,
+      #A30032 50.2%, #A30032 100%
+    );
+  }
+
+  /* Bolt watermark behind content */
+  .badge-bolt-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .badge-bolt-bg svg {
+    height: 200%;
+    width: auto;
+    opacity: 0.07;
+  }
+
+  /* Animated corner glows that pulse on show */
+  .badge-glow-blue {
+    position: absolute;
+    left: -60px; top: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,78,152,0.6) 0%, transparent 65%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .badge-glow-red {
+    position: absolute;
+    right: -60px; bottom: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(163,0,50,0.5) 0%, transparent 65%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .goal-card.show .badge-glow-blue,
+  .goal-card.show .badge-glow-red {
+    opacity: 1;
+  }
+
+  /* ── CONTENT COLUMNS ── */
+  .goal-col {
+    position: relative;
+    z-index: 2;
+  }
+  .goal-col-left  { text-align: right; }
+  .goal-col-right { text-align: left; }
+
+  .goal-divider {
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255,255,255,0.25) 20%,
+      rgba(255,255,255,0.25) 80%,
+      transparent 100%
+    );
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .goal-team-label {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 0.9rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .goal-word {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 5.5rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 0.88;
+    color: #ffffff;
+  }
+  .goal-word.barca { color: #4d9fff; }
+  .goal-word.rival { color: #ff4466; }
+
+  .goal-score-line {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.6rem;
+    letter-spacing: 0.08em;
+    color: #fff;
+    margin-top: 6px;
+  }
+
+  /* ── SCORE FLASH on the rival side ── */
+  .goal-exclaim {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 5.5rem;
+    line-height: 0.88;
+    color: rgba(255,255,255,0.2);
+  }
+  .goal-exclaim.rival-scored { color: #ff4466; }
+
+  /* ── PARTICLE BURST ── */
+  .particle-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+  }
+
+  /* Burst animation — particles fly outward from centre */
+  @keyframes burst {
+    0%   { transform: translate(0, 0) scale(0);   opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
+  }
+
+  /* Shimmer on the badge */
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%) skewX(-20deg); }
+    100% { transform: translateX(300%)  skewX(-20deg); }
+  }
+  .badge-shimmer {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 60px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.08),
+      transparent
+    );
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+  }
+  .goal-card.show .badge-shimmer {
+    opacity: 1;
+    animation: shimmer 1.2s ease 0.3s forwards;
+  }
+
+  /* ── SOUND NOTE (hidden — used by JS) ── */
+  /* Place your goal sound at: assets/sounds/goal-crowd.mp3 */
+</style>
+</head>
+<body>
+
+  <!-- Full screen dimmer -->
+  <div class="goal-dimmer" id="goalDimmer"></div>
+
+  <!-- Particle burst field -->
+  <div class="particle-field" id="particleField"></div>
+
+  <!-- Goal card -->
+  <div class="goal-card" id="goalCard">
+    <div class="goal-badge" id="goalBadge">
+
+      <!-- Animated background layers -->
+      <div class="badge-bolt-bg">
+        <svg viewBox="0 0 120 200" fill="none">
+          <defs>
+            <linearGradient id="bolt-g" x1="60" y1="0" x2="60" y2="200" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stop-color="#4d9fff" stop-opacity="0.9"/>
+              <stop offset="45%"  stop-color="#ffffff" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#ff3366" stop-opacity="0.9"/>
+            </linearGradient>
+          </defs>
+          <path d="M85 8 L35 104 L62 104 L44 192 L98 92 L68 92 Z" fill="url(#bolt-g)"/>
+        </svg>
+      </div>
+      <div class="badge-glow-blue"></div>
+      <div class="badge-glow-red"></div>
+      <div class="badge-shimmer"></div>
+
+      <!-- Left column — scoring team -->
+      <div class="goal-col goal-col-left">
+        <div class="goal-team-label" id="scoringTeamLabel">FC Barcelona</div>
+        <div class="goal-word" id="goalWord">GOOOL!</div>
+        <div class="goal-score-line" id="goalScoreLine">1 – 0</div>
+      </div>
+
+      <!-- Divider -->
+      <div class="goal-divider"></div>
+
+      <!-- Right column — other team -->
+      <div class="goal-col goal-col-right">
+        <div class="goal-team-label" id="otherTeamLabel">vs Real Madrid</div>
+        <div class="goal-exclaim" id="goalExclaim">!</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Audio element — swap src for your own file in assets/sounds/ -->
+  <audio id="goalSound" preload="auto">
+    <source src="assets/sounds/goal-crowd.mp3" type="audio/mpeg">
+  </audio>
+
+<script>
+  // ── BROADCAST CHANNEL RECEIVER ──────────────────────────────────────────
+  const channel = new BroadcastChannel('beyond-barca-overlay');
+
+  // ── DOM REFS ─────────────────────────────────────────────────────────────
+  const dimmer          = document.getElementById('goalDimmer');
+  const card            = document.getElementById('goalCard');
+  const goalWord        = document.getElementById('goalWord');
+  const goalScoreLine   = document.getElementById('goalScoreLine');
+  const scoringLabel    = document.getElementById('scoringTeamLabel');
+  const otherLabel      = document.getElementById('otherTeamLabel');
+  const goalExclaim     = document.getElementById('goalExclaim');
+  const particleField   = document.getElementById('particleField');
+  const goalSound       = document.getElementById('goalSound');
+
+  let hideTimer = null;
+
+  // ── TEAM NAME MAP ─────────────────────────────────────────────────────────
+  // Friendly display names for known La Liga codes.
+  // Add more here as needed.
+  const teamNames = {
+    BAR: 'FC Barcelona',
+    RMA: 'Real Madrid',
+    ATM: 'Atlético Madrid',
+    SEV: 'Sevilla FC',
+    VIL: 'Villarreal',
+    ATH: 'Athletic Club',
+    BET: 'Real Betis',
+    CEL: 'Celta Vigo',
+    ESP: 'Espanyol',
+    GET: 'Getafe',
+    OSA: 'Osasuna',
+    RAY: 'Rayo Vallecano',
+    ALA: 'Alavés',
+    GIR: 'Girona',
+    VAL: 'Valencia',
+    RSO: 'Real Sociedad',
+    OVI: 'Real Oviedo',
+    LEV: 'Levante',
+    MLL: 'Mallorca',
+    ELC: 'Elche'
+  };
+
+  function teamName(code) {
+    return teamNames[code] || code;
+  }
+
+  // ── PARTICLE BURST ────────────────────────────────────────────────────────
+  const BARCA_COLORS = ['#4d9fff', '#ffffff', '#004E98', '#a8d4ff'];
+  const RIVAL_COLORS = ['#ff4466', '#ffffff', '#A30032', '#ff8899'];
+
+  function spawnParticles(isBarça) {
+    particleField.innerHTML = '';
+    const colors = isBarça ? BARCA_COLORS : RIVAL_COLORS;
+    const cx = 960; // horizontal centre of 1920px canvas
+    const cy = 540; // vertical centre of 1080px canvas
+    const count = 28;
+
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size  = Math.random() * 14 + 6;
+      const angle = (Math.PI * 2 / count) * i + (Math.random() * 0.4 - 0.2);
+      const dist  = Math.random() * 380 + 160;
+      const tx    = Math.cos(angle) * dist;
+      const ty    = Math.sin(angle) * dist;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const dur   = Math.random() * 0.5 + 0.7;
+      const delay = Math.random() * 0.15;
+
+      p.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${cx}px;
+        top: ${cy}px;
+        background: ${color};
+        --tx: ${tx}px;
+        --ty: ${ty}px;
+        animation: burst ${dur}s ease-out ${delay}s forwards;
+      `;
+      particleField.appendChild(p);
+    }
+  }
+
+  // ── SHOW GOAL ANIMATION ───────────────────────────────────────────────────
+  function showGoal(data) {
+    const scoringCode = data.type === 'homeGoal' ? data.homeCode : data.awayCode;
+    const otherCode   = data.type === 'homeGoal' ? data.awayCode : data.homeCode;
+    const isBarça     = data.isBarça;
+
+    // Score line — always home left, away right
+    const scoreLine = `${data.homeScore} – ${data.awayScore}`;
+
+    // Labels
+    scoringLabel.textContent = teamName(scoringCode);
+    otherLabel.textContent   = 'vs ' + teamName(otherCode);
+
+    // Goal word and colour
+    goalWord.textContent = isBarça ? 'GOOOL!' : 'GOAL';
+    goalWord.className   = 'goal-word ' + (isBarça ? 'barca' : 'rival');
+
+    // Score line
+    goalScoreLine.textContent = scoreLine;
+
+    // Exclaim on other side
+    goalExclaim.className  = 'goal-exclaim' + (isBarça ? '' : ' rival-scored');
+    goalExclaim.textContent = isBarça ? '!' : '⚽';
+
+    // Particles
+    spawnParticles(isBarça);
+
+    // Show
+    dimmer.classList.add('show');
+    card.classList.add('show');
+
+    // Play sound — browsers require a prior user interaction in most contexts.
+    // In Streamlabs browser sources this works fine because the source is
+    // treated as a trusted context after the first page load interaction.
+    goalSound.currentTime = 0;
+    goalSound.play().catch(() => {
+      // Sound file not yet added — silent fail, no console error spam
+    });
+
+    // Auto-hide after 5 seconds
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideGoal, 5000);
+  }
+
+  function hideGoal() {
+    dimmer.classList.remove('show');
+    card.classList.remove('show');
+    particleField.innerHTML = '';
+  }
+
+  // ── LISTEN FOR SCOREBOARD EVENTS ─────────────────────────────────────────
+  channel.onmessage = (e) => {
+    const { type } = e.data;
+    if (type === 'homeGoal' || type === 'awayGoal') {
+      showGoal(e.data);
+    }
+    // Dismiss on FT just in case it's still showing
+    if (type === 'ft') {
+      hideGoal();
+    }
+  };
+</script>
+</body>
+</html>
