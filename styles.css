@@ -1,20 +1,70 @@
+/*
+  ╔══════════════════════════════════════════════════╗
+  ║  Beyond Barca — Scoreboard CSS                  ║
+  ║  Restyled from La Liga Style A                  ║
+  ║  Brand Kit v1.0 · 2025                          ║
+  ╚══════════════════════════════════════════════════╝
+
+  WHAT CHANGED vs original:
+  ─────────────────────────────────────────────────
+  • Fonts        → Barlow Condensed (all UI text)
+  • Colours      → Brand dark slate base, blue|red accents
+                   Gold/yellow eliminated entirely
+                   Magenta/fire-orange eliminated
+  • Panels       → Deep navy → near-black gradient (brand "Deep" gradient)
+  • Borders      → Barça Blue at low opacity instead of gold
+  • Glows        → Blue left side, red right side (matches brand split rule)
+  • League strip → Blue|red split top bar motif
+  • Phase badge  → Blue-tinted, no gold
+  • Scores/times → White with subtle blue glow
+  • Center card  → Blue left glow / red right glow (brand corners)
+  • NOTHING else changed — grid, sizing, layout, JS hooks all intact
+*/
+
+/* ── GOOGLE FONT IMPORT ─────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&display=swap');
+
+/* ── BRAND TOKENS ───────────────────────────────── */
 :root {
-  --text: #f4f6ff;
-  --dark: rgba(15, 17, 28, 0.96);
-  --muted: rgba(20, 22, 35, 0.9);
-  --light-card: rgba(255, 255, 255, 0.92);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --metal-gold-bright: #f8de8b;
-  --metal-gold-mid: #b88a2e;
-  --metal-gold-deep: #5a3f12;
-  --accent-fire: #ff8a1f;
-  --accent-magenta: #7f3af8;
-  --panel-navy-top: #1b2148;
-  --panel-navy-bottom: #0a0e2a;
-  --panel-sheen: rgba(255, 255, 255, 0.16);
-  --scoreboard-texture: none; /* Optional asset hook: url("assets/metal-noise.png") */
+  /* Core brand colours */
+  --bb-blue:       #004E98;
+  --bb-red:        #A30032;
+  --bb-sky:        #4d9fff;
+  --bb-crimson:    #cc1144;
+  --bb-slate:      #111318;
+  --bb-dark:       #07080c;
+  --bb-mid:        #0d0f14;
+  --bb-muted:      rgba(255,255,255,0.45);
+
+  /* Panel gradients */
+  --panel-top:     #0e1520;
+  --panel-bottom:  #07080c;
+
+  /* Kept from original (structural — do not rename) */
+  --text:          #f4f6ff;
+  --dark:          rgba(7, 8, 12, 0.96);
+  --muted:         rgba(13, 15, 20, 0.92);
+  --light-card:    rgba(255, 255, 255, 0.92);
+  --shadow:        0 10px 30px rgba(0, 0, 0, 0.5);
+
+  /* Gold eliminated — remapped to brand blue at low opacity */
+  --metal-gold-bright: rgba(77, 159, 255, 0.55);
+  --metal-gold-mid:    rgba(0, 78, 152, 0.45);
+  --metal-gold-deep:   rgba(0, 30, 70, 0.6);
+
+  /* Fire/magenta eliminated — remapped to brand accents */
+  --accent-fire:    var(--bb-sky);
+  --accent-magenta: var(--bb-blue);
+
+  /* Panel vars — remapped to brand dark */
+  --panel-navy-top:    #0e1520;
+  --panel-navy-bottom: #07080c;
+  --panel-sheen:       rgba(255, 255, 255, 0.06);
+
+  --scoreboard-texture: none;
 }
 
+/* ── BASE ───────────────────────────────────────── */
 * {
   box-sizing: border-box;
 }
@@ -23,7 +73,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  font-family: Inter, Arial, sans-serif;
+  /* Barlow Condensed replaces Inter */
+  font-family: 'Barlow Condensed', Arial, sans-serif;
+  font-weight: 700;
   background: transparent;
 }
 
@@ -41,11 +93,13 @@ body {
   color: var(--text);
 }
 
+/* ── LOGO BUBBLE ────────────────────────────────── */
 .logo-bubble {
   width: 86px;
   height: 86px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 20%, #fff, #edf1ff 70%);
+  /* Dark disc instead of white */
+  background: radial-gradient(circle at 30% 20%, #0c1e3e, #050b18 70%);
   display: grid;
   place-items: center;
   box-shadow: var(--shadow);
@@ -57,7 +111,9 @@ body {
   object-fit: contain;
 }
 
-/* Style A */
+/* ══════════════════════════════════════════════════
+   STYLE A
+══════════════════════════════════════════════════ */
 .score-a {
   --board-h: 94px;
   --team-card-h: 88px;
@@ -69,33 +125,52 @@ body {
   --team-code-size: var(--display-size);
   --score-size: var(--display-size);
   --time-size: var(--display-size);
+
+  /* Unchanged structural properties */
   display: grid;
   gap: 8px;
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.42));
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55));
 }
 
+/* ── LEAGUE STRIP ───────────────────────────────── */
+/*
+  Original: gold border, dark navy bg, purple glow
+  Now:      blue|red split top bar, dark slate bg, blue glow
+*/
 .league-strip {
   text-align: center;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  background:
-    linear-gradient(180deg, rgba(22, 30, 76, 0.9), rgba(9, 12, 33, 0.95)),
-    var(--scoreboard-texture);
-  color: #f5f8ff;
-  border: 1px solid rgba(248, 222, 139, 0.45);
+
+  /* Brand dark base */
+  background: linear-gradient(180deg, #0e1520 0%, #07080c 100%);
+
+  color: #f4f6ff;
+
+  /* Blue|red split border — top mimics the brand split bar motif */
+  border: 1px solid rgba(0, 78, 152, 0.35);
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, var(--bb-blue) 0%, var(--bb-blue) 49.8%, var(--bb-red) 50.2%, var(--bb-red) 100%) 1 0 0 0;
+
   border-radius: 10px;
   padding: 5px 12px;
   font-size: clamp(12px, 1.7vw, 18px);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+  text-shadow: 0 0 10px rgba(77, 159, 255, 0.2);
+
+  /* Blue glow instead of purple */
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 18px rgba(127, 58, 248, 0.25);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 18px rgba(0, 78, 152, 0.2);
 }
 
+/* ── TEAMS ROW ──────────────────────────────────── */
+/* Structural — unchanged */
 .teams-row {
   display: grid;
   grid-template-columns: auto auto auto;
@@ -105,18 +180,30 @@ body {
   gap: 8px;
 }
 
+/* ── TEAM SIDE PANELS ───────────────────────────── */
+/*
+  Original: navy gradient, gold border, blue outer glow
+  Now:      brand dark gradient, brand blue border at low opacity
+            home side gets blue left glow, away gets red right glow
+*/
 .team-side {
   position: relative;
   overflow: hidden;
+
+  /* Brand "Deep" gradient */
   background:
     linear-gradient(180deg, var(--panel-navy-top), var(--panel-navy-bottom)),
     var(--scoreboard-texture);
+
   border-radius: 14px;
-  border: 1px solid rgba(248, 222, 139, 0.55);
+
+  /* Brand blue border — subtle */
+  border: 1px solid rgba(0, 78, 152, 0.4);
+
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    0 0 14px rgba(16, 158, 255, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+
   padding: 8px 16px;
   display: flex;
   align-items: center;
@@ -128,24 +215,46 @@ body {
   align-self: center;
 }
 
+/* Home side — blue left glow */
+[data-home-side].team-side {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(0, 78, 152, 0.28),
+    -4px 0 12px rgba(0, 78, 152, 0.2);
+}
+
+/* Away side — red right glow */
+[data-away-side].team-side {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(163, 0, 50, 0.28),
+    4px 0 12px rgba(163, 0, 50, 0.2);
+}
+
 .team-side::before,
 .center-score::before {
   content: "";
   position: absolute;
   inset: 1px;
   border-radius: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   pointer-events: none;
 }
 
+/* ── TEAM CODE ──────────────────────────────────── */
 .team-code {
-  font-size: var(--team-code-size);
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
+  font-style: italic;
+  font-size: var(--team-code-size);
+  letter-spacing: 0.06em;
   line-height: 1;
   padding-inline: 4px;
   text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.5),
-    0 0 8px rgba(128, 208, 255, 0.36);
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(77, 159, 255, 0.2);
 }
 
 [data-home-side] .team-code {
@@ -155,35 +264,45 @@ body {
 [data-away-side] .team-code {
   color: var(--away-color, #f4f6ff);
 }
-/* Apply team colors to logo bubbles */
 
+/* ── LOGO BUBBLES ───────────────────────────────── */
+/* Team color borders kept (JS hook) — disc goes dark */
 [data-home-side] .logo-bubble {
-  border: 4px solid var(--home-color, #ffffff);
+  border: 4px solid var(--home-color, var(--bb-sky));
 }
 
 [data-away-side] .logo-bubble {
-  border: 4px solid var(--away-color, #ffffff);
+  border: 4px solid var(--away-color, var(--bb-crimson));
 }
 
 .score-a .logo-bubble {
   width: var(--logo-size);
   height: var(--logo-size);
+
+  /* Brand dark disc */
   background:
-    radial-gradient(circle at 30% 20%, #223267, #0f1438 70%),
+    radial-gradient(circle at 30% 20%, #0c1e3e, #050b18 70%),
     var(--scoreboard-texture);
+
   border-radius: 50%;
   box-shadow:
-    0 0 0 1px rgba(248, 222, 139, 0.55),
-    inset 0 1px 5px rgba(255, 255, 255, 0.2),
-    0 0 14px rgba(16, 158, 255, 0.28);
+    0 0 0 1px rgba(0, 78, 152, 0.4),
+    inset 0 1px 5px rgba(255, 255, 255, 0.12),
+    0 0 14px rgba(0, 78, 152, 0.22);
 }
 
 .score-a .logo-bubble img {
   width: var(--logo-img-size);
   height: var(--logo-img-size);
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.25));
 }
 
+/* ── CENTER SCORE CARD ──────────────────────────── */
+/*
+  Original: navy gradient, gold border, fire+magenta corner glows
+  Now:      brand dark gradient, subtle blue border,
+            blue top-left / red bottom-right corner glows
+*/
 .center-score {
   position: relative;
   overflow: hidden;
@@ -192,30 +311,39 @@ body {
   align-items: center;
   text-align: center;
   width: var(--center-card-w);
+
+  /* Brand deep gradient */
   background:
-    linear-gradient(180deg, #232958, #0b1133),
+    linear-gradient(180deg, #0e1a2e, #070a14),
     var(--scoreboard-texture);
+
   border-radius: 14px;
-  border: 1px solid rgba(248, 222, 139, 0.7);
+
+  /* Brand blue border */
+  border: 1px solid rgba(0, 78, 152, 0.5);
+
   min-width: 0;
   height: var(--team-card-h);
   align-self: center;
+
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 16px rgba(127, 58, 248, 0.28);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 20px rgba(0, 78, 152, 0.25);
 }
 
+/* Blue|red corner atmosphere — matches brand split rule */
 .center-score::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 12% 20%, rgba(255, 138, 31, 0.2), transparent 42%),
-    radial-gradient(circle at 88% 20%, rgba(127, 58, 248, 0.22), transparent 42%),
+    radial-gradient(circle at 8% 25%, rgba(0, 78, 152, 0.28), transparent 45%),
+    radial-gradient(circle at 92% 75%, rgba(163, 0, 50, 0.25), transparent 45%),
     linear-gradient(180deg, var(--panel-sheen), transparent 36%);
   pointer-events: none;
 }
 
+/* ── TIME DISPLAY ───────────────────────────────── */
 .time-wrap {
   margin-top: 0;
   display: flex;
@@ -228,35 +356,58 @@ body {
 .time-box {
   background: transparent;
   border-radius: 0;
-  font-family: 'Inter Tight', 'Arial Black', sans-serif;
+
+  /* Barlow Condensed replaces Inter Tight / Arial Black */
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+
   font-size: var(--time-size);
-  font-weight: 800;
   color: #ffffff;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: 1;
   padding: 0;
   text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.5),
-    0 0 10px rgba(80, 180, 255, 0.42);
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 0 12px rgba(77, 159, 255, 0.35);
 }
 
+/* ── PHASE BADGE ────────────────────────────────── */
+/*
+  Original: gold border, amber gradient, gold text
+  Now:      brand blue border, dark slate bg, sky blue text
+*/
 .phase-badge {
   min-width: 0;
   padding: 2px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(248, 222, 139, 0.45);
-  background: linear-gradient(180deg, rgba(255, 187, 89, 0.25), rgba(128, 70, 13, 0.3));
+
+  /* Brand blue border */
+  border: 1px solid rgba(0, 78, 152, 0.5);
+
+  /* Dark slate base with subtle blue tint */
+  background: linear-gradient(180deg, rgba(0, 78, 152, 0.2), rgba(0, 30, 80, 0.3));
+
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
+  letter-spacing: 0.15em;
   font-size: clamp(10px, 1.2vw, 12px);
-  color: #ffdd9f;
+
+  /* Sky blue text instead of gold */
+  color: var(--bb-sky);
   text-transform: uppercase;
-  text-shadow: 0 0 6px rgba(255, 170, 66, 0.45);
+  text-shadow: 0 0 8px rgba(77, 159, 255, 0.4);
 }
 
 .phase-badge:empty {
   display: none;
 }
 
+/* ── SIDE SCORE NUMBERS ─────────────────────────── */
+/*
+  Original: Arial Black / Impact / Inter Tight
+  Now:      Barlow Condensed 900 italic
+*/
 [data-home-side],
 [data-away-side] {
   margin-top: 0;
@@ -275,23 +426,27 @@ body {
 }
 
 .side-score {
-  font-family: 'Arial Black', Impact, 'Inter Tight', sans-serif;
-  font-size: var(--score-size);
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
+  font-style: italic;
+  font-size: var(--score-size);
+  letter-spacing: 0.04em;
   line-height: 1;
   color: #f4f8ff;
   background: transparent;
   border-radius: 0;
   padding: 0;
   text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.5),
-    0 0 10px rgba(79, 203, 255, 0.34);
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 0 12px rgba(77, 159, 255, 0.28);
 }
 
+/* ── CONTROL PANEL ──────────────────────────────── */
+/* Mostly unchanged — just font + colours tidied */
 .control-panel {
   margin-top: 14px;
-  background: rgba(12, 14, 24, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(7, 8, 12, 0.92);
+  border: 1px solid rgba(0, 78, 152, 0.2);
   border-radius: 14px;
   padding: 12px;
 }
@@ -299,6 +454,11 @@ body {
 .control-panel h2 {
   margin: 0 0 10px;
   font-size: 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
 }
 
 .controls-grid {
@@ -310,18 +470,27 @@ body {
 .controls-grid button {
   border: 0;
   border-radius: 9px;
-  background: #283056;
+  background: #0e1520;
+  border: 1px solid rgba(0, 78, 152, 0.25);
   color: #fff;
   padding: 10px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .controls-grid button:hover {
-  background: #364074;
+  background: #162038;
+  border-color: rgba(0, 78, 152, 0.55);
 }
 
-/* Style B */
+/* ══════════════════════════════════════════════════
+   STYLE B  (unchanged structurally — font updated)
+══════════════════════════════════════════════════ */
 .score-b {
   display: grid;
   gap: 14px;
@@ -331,7 +500,13 @@ body {
   width: 100%;
   height: 5px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  /* Brand split bar */
+  background: linear-gradient(90deg,
+    var(--bb-blue) 0%,
+    var(--bb-blue) 49.8%,
+    var(--bb-red) 50.2%,
+    var(--bb-red) 100%
+  );
 }
 
 .pill-shell {
@@ -355,9 +530,11 @@ body {
 }
 
 .score-main {
-  font-size: clamp(48px, 9vw, 84px);
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
-  letter-spacing: 0.03em;
+  font-style: italic;
+  font-size: clamp(48px, 9vw, 84px);
+  letter-spacing: 0.04em;
   line-height: 1;
 }
 
@@ -365,16 +542,19 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: clamp(20px, 4vw, 30px);
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
+  font-size: clamp(20px, 4vw, 30px);
   margin-top: 6px;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .match-time {
   min-width: 130px;
 }
 
+/* ── RESPONSIVE ─────────────────────────────────── */
 @media (max-width: 720px) {
   .teams-row {
     grid-template-columns: 1fr;
