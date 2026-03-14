@@ -1,6 +1,27 @@
 (function () {
   const params = new URLSearchParams(window.location.search);
 
+  // ── BEYOND BARCA BROADCAST CHANNEL ──────────────────────────────────────
+  // Opens a named channel shared by all overlay browser sources on this machine.
+  // overlay-goal.html, overlay-alerts.html and overlay-bottom-bar.html all
+  // listen on the same 'beyond-barca-overlay' channel name.
+  const channel = new BroadcastChannel('beyond-barca-overlay');
+
+  // Helper — sends a typed event with current match context attached
+  function broadcast(type, extra = {}) {
+    channel.postMessage({
+      type,
+      homeCode:  state.homeCode,
+      awayCode:  state.awayCode,
+      homeScore: state.homeScore,
+      awayScore: state.awayScore,
+      minute:    Math.floor(state.elapsedSeconds / 60),
+      half:      state.half,
+      ...extra
+    });
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
   const teamPalette = {
     ALA: '#0057b8',
     ATH: '#d7141a',
@@ -213,12 +234,14 @@ const state = {
         state.half = 1;
         state.phase = '';
         state.running = false;
+        broadcast('kickoff');
         break;
       case 'secondHalf':
         state.elapsedSeconds = 45 * 60;
         state.half = 2;
         state.phase = '';
         state.running = false;
+        broadcast('secondHalf');
         break;
       case 'startPause':
         state.running = !state.running;
@@ -232,9 +255,15 @@ const state = {
         break;
       case 'homeGoal':
         state.homeScore += 1;
+        // Broadcast AFTER increment so receivers get the updated score.
+        // isBarça tells the goal overlay whether to show blue (Barça scored)
+        // or red (rival scored) animation.
+        broadcast('homeGoal', { isBarça: state.homeCode === 'BAR' });
         break;
       case 'awayGoal':
         state.awayScore += 1;
+        // isBarça is true when Barça is the away side
+        broadcast('awayGoal', { isBarça: state.awayCode === 'BAR' });
         break;
       case 'plusMinute':
         state.elapsedSeconds += 60;
@@ -245,10 +274,12 @@ const state = {
       case 'ht':
         state.phase = 'HT';
         state.running = false;
+        broadcast('ht');
         break;
       case 'ft':
         state.phase = 'FT';
         state.running = false;
+        broadcast('ft');
         break;
       default:
         break;
@@ -277,5 +308,6 @@ const state = {
 
   window.addEventListener('beforeunload', () => {
     stopTimer();
+    channel.close();
   });
 })();
