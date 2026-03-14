@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Barca — Bottom Bar</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:    #004E98;
+    --red:     #A30032;
+    --sky:     #4d9fff;
+    --dark:    #07080c;
+    --mid:     #0d0f14;
+    --muted:   rgba(255,255,255,0.45);
+  }
+
+  /* Transparent body — only the bar is visible in Streamlabs */
+  body {
+    background: transparent;
+    width: 1920px;
+    height: 80px;
+    overflow: hidden;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ══════════════════════════════════════════════════
+     BOTTOM BAR — full width, 80px tall
+  ══════════════════════════════════════════════════ */
+  .bottom-bar {
+    width: 1920px;
+    height: 80px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    background: rgba(5, 8, 15, 0.93);
+    backdrop-filter: blur(14px);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(
+      90deg,
+      var(--blue) 0%, var(--blue) 49.8%,
+      var(--red)  50.2%, var(--red)  100%
+    ) 1 0 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle blue/red atmosphere behind content */
+  .bottom-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(0,78,152,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 50%, rgba(163,0,50,0.12) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* Bolt watermark behind everything */
+  .bar-bolt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 200%;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+
+  /* ── ZONE SHARED STYLES ── */
+  .bar-zone {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* ════════════════════════════════════════════════
+     LEFT ZONE — CHAT PROMPT ROTATOR
+  ════════════════════════════════════════════════ */
+  .zone-prompts {
+    padding: 0 28px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    gap: 12px;
+  }
+
+  /* Subtle stadium silhouette behind prompts */
+  .prompt-stadium-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .prompt-stadium-bg svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Viewport clips the slide animation */
+  .prompt-viewport {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Each prompt card */
+  .prompt-card {
+    position: absolute;
+    left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(110%);
+    transition:
+      opacity   0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .prompt-card.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .prompt-card.exit-up {
+    opacity: 0;
+    transform: translateY(-110%);
+  }
+
+  /* Badge pill */
+  .prompt-badge {
+    flex-shrink: 0;
+    font-size: 0.55rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 900;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .prompt-badge.vote    { background: rgba(0,78,152,0.5);     color: var(--sky);   border: 1px solid rgba(77,159,255,0.3); }
+  .prompt-badge.rate    { background: rgba(163,0,50,0.5);     color: #ff8899;      border: 1px solid rgba(163,0,50,0.4); }
+  .prompt-badge.predict { background: rgba(255,215,0,0.12);   color: #ffd700;      border: 1px solid rgba(255,215,0,0.25); }
+  .prompt-badge.chat    { background: rgba(77,159,255,0.15);  color: #a8d4ff;      border: 1px solid rgba(77,159,255,0.2); }
+
+  /* Text block */
+  .prompt-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .prompt-question {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.15rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .prompt-underline {
+    height: 1px;
+    background: linear-gradient(90deg, var(--blue), var(--sky), transparent);
+    border-radius: 1px;
+    margin-top: 3px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.7s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .prompt-card.active .prompt-underline {
+    transform: scaleX(1);
+  }
+  .prompt-cta {
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    font-weight: 700;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  /* Progress dots */
+  .prompt-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .prompt-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .prompt-dot.active {
+    background: var(--sky);
+    transform: scale(1.5);
+  }
+
+  /* ════════════════════════════════════════════════
+     CENTER ZONE — FOLLOW GOAL TRACKER
+  ════════════════════════════════════════════════ */
+  .zone-center {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 40px;
+    min-width: 280px;
+  }
+
+  .follow-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--sky);
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .follow-numbers {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .follow-current { color: #fff; }
+  .follow-slash   { color: rgba(255,255,255,0.22); font-size: 0.8em; }
+  .follow-total   { color: rgba(255,255,255,0.32); }
+
+  .follow-track {
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+    position: relative;
+  }
+  .follow-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--blue), var(--sky));
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+
+  /* Goal milestone flash — bar turns gold briefly when goal scored */
+  @keyframes goalFlash {
+    0%   { background: linear-gradient(90deg, var(--blue), var(--sky)); }
+    20%  { background: linear-gradient(90deg, #ffd700, #fff); }
+    100% { background: linear-gradient(90deg, var(--blue), var(--sky)); }
+  }
+  .follow-fill.goal-flash {
+    animation: goalFlash 1.5s ease forwards;
+  }
+
+  /* ════════════════════════════════════════════════
+     RIGHT ZONE — ALERT TICKER
+  ════════════════════════════════════════════════ */
+  .zone-ticker {
+    padding: 0 28px;
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .ticker-track {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    white-space: nowrap;
+    /* animation set dynamically via JS so width is correct */
+    animation: tickerScroll 30s linear infinite;
+  }
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .ticker-type {
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 900;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .ticker-type.follow { background: rgba(0,78,152,0.5);    color: var(--sky);  border: 1px solid rgba(77,159,255,0.3); }
+  .ticker-type.sub    { background: rgba(163,0,50,0.5);    color: #ff8899;     border: 1px solid rgba(163,0,50,0.4); }
+  .ticker-type.cheer  { background: rgba(255,215,0,0.15);  color: #ffd700;     border: 1px solid rgba(255,215,0,0.3); }
+  .ticker-type.goal   { background: rgba(0,78,152,0.6);    color: #fff;        border: 1px solid rgba(77,159,255,0.5); }
+
+  .ticker-name {
+    font-size: 0.85rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 900;
+    font-style: italic;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .ticker-msg {
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.38);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .ticker-sep {
+    width: 1px;
+    height: 16px;
+    background: rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="bottom-bar">
+
+  <!-- Bolt watermark -->
+  <svg class="bar-bolt" viewBox="0 0 120 200" fill="none" preserveAspectRatio="xMidYMid meet">
+    <path d="M85 8 L35 104 L62 104 L44 192 L98 92 L68 92 Z" fill="white"/>
+  </svg>
+
+  <!-- ── LEFT: CHAT PROMPT ROTATOR ── -->
+  <div class="bar-zone zone-prompts" id="zonePrompts">
+
+    <!-- Stadium silhouette watermark -->
+    <div class="prompt-stadium-bg">
+      <svg viewBox="0 0 600 80" preserveAspectRatio="xMidYMid slice" fill="none">
+        <ellipse cx="300" cy="110" rx="280" ry="100" fill="white"/>
+        <rect x="20" y="55" width="560" height="40" fill="white"/>
+        <rect x="180" y="58" width="240" height="28" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+        <line x1="300" y1="58" x2="300" y2="86" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="prompt-viewport" id="promptViewport"></div>
+    <div class="prompt-dots" id="promptDots"></div>
+
+  </div>
+
+  <!-- ── CENTER: FOLLOW GOAL ── -->
+  <div class="bar-zone zone-center">
+    <div class="follow-label">Follow Goal</div>
+    <div class="follow-numbers">
+      <span class="follow-current" id="followCurrent">0</span>
+      <span class="follow-slash">/</span>
+      <span class="follow-total" id="followTotal">100</span>
+    </div>
+    <div class="follow-track">
+      <div class="follow-fill" id="followFill"></div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: ALERT TICKER ── -->
+  <div class="bar-zone zone-ticker">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- Seeded items — duplicated for seamless loop -->
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">BeyondBarca</span></div>
+      <div class="ticker-sep"></div>
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">CulerForever</span></div>
+      <div class="ticker-sep"></div>
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">LaLigaFan</span></div>
+      <div class="ticker-sep"></div>
+      <!-- duplicate set for seamless loop -->
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">BeyondBarca</span></div>
+      <div class="ticker-sep"></div>
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">CulerForever</span></div>
+      <div class="ticker-sep"></div>
+      <div class="ticker-item"><span class="ticker-type follow">FOLLOW</span><span class="ticker-name">LaLigaFan</span></div>
+      <div class="ticker-sep"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── BROADCAST CHANNEL ─────────────────────────────────────────────────────
+  const channel = new BroadcastChannel('beyond-barca-overlay');
+
+  // ── FOLLOW GOAL STATE ─────────────────────────────────────────────────────
+  // Edit these two values to change the goal target and starting count
+  let followCount = 0;
+  const followGoal = 100;
+
+  const followCurrentEl = document.getElementById('followCurrent');
+  const followTotalEl   = document.getElementById('followTotal');
+  const followFillEl    = document.getElementById('followFill');
+
+  followTotalEl.textContent = followGoal;
+
+  function setFollowCount(n) {
+    followCount = Math.min(Math.max(0, n), followGoal);
+    followCurrentEl.textContent = followCount;
+    followFillEl.style.width = (followCount / followGoal * 100) + '%';
+  }
+
+  function flashGoalBar() {
+    followFillEl.classList.remove('goal-flash');
+    // Force reflow so re-adding the class restarts the animation
+    void followFillEl.offsetWidth;
+    followFillEl.classList.add('goal-flash');
+    setTimeout(() => followFillEl.classList.remove('goal-flash'), 1600);
+  }
+
+  // ── PROMPT ROTATOR ────────────────────────────────────────────────────────
+  const prompts = [
+    { badge: 'vote',    label: 'VOTE',    question: 'Who will score next?',        cta: 'Drop your prediction in chat!' },
+    { badge: 'rate',    label: 'RATE',    question: 'Rate the half — 1 to 10',     cta: 'Type your number in chat now' },
+    { badge: 'vote',    label: 'VOTE',    question: 'Who is Man of the Match?',    cta: 'Name your pick below!' },
+    { badge: 'predict', label: 'PREDICT', question: 'Score prediction?',           cta: 'What\'s the final score?' },
+    { badge: 'chat',    label: 'CHAT',    question: 'Barça clean sheet today?',    cta: 'YES or NO in chat!' },
+    { badge: 'rate',    label: 'RATE',    question: 'Rate Pedri\'s performance',   cta: '1–10 in chat right now' },
+    { badge: 'vote',    label: 'VOTE',    question: 'Next goal before 70\'?',      cta: 'YES or NO — let\'s go!' },
+    { badge: 'chat',    label: 'CHAT',    question: 'Best goal you\'ve seen live?', cta: 'Tell us in chat!' },
+  ];
+
+  let currentPrompt = 0;
+  let rotateTimer   = null;
+  const ROTATE_MS   = 8000; // 8 seconds per prompt
+
+  function buildPrompts() {
+    const viewport = document.getElementById('promptViewport');
+    const dotsEl   = document.getElementById('promptDots');
+    viewport.innerHTML = '';
+    dotsEl.innerHTML   = '';
+
+    prompts.forEach((p, i) => {
+      // Card
+      const card = document.createElement('div');
+      card.className = 'prompt-card' + (i === 0 ? ' active' : '');
+      card.id = 'prompt-' + i;
+      card.innerHTML = `
+        <span class="prompt-badge ${p.badge}">${p.label}</span>
+        <div class="prompt-text">
+          <div class="prompt-question">${p.question}</div>
+          <div class="prompt-underline"></div>
+          <div class="prompt-cta">${p.cta}</div>
+        </div>`;
+      viewport.appendChild(card);
+
+      // Dot
+      const dot = document.createElement('div');
+      dot.className = 'prompt-dot' + (i === 0 ? ' active' : '');
+      dot.id = 'dot-' + i;
+      dotsEl.appendChild(dot);
+    });
+  }
+
+  function showPrompt(idx) {
+    const prev = currentPrompt;
+    currentPrompt = (idx + prompts.length) % prompts.length;
+
+    const prevCard = document.getElementById('prompt-' + prev);
+    const nextCard = document.getElementById('prompt-' + currentPrompt);
+    const prevDot  = document.getElementById('dot-' + prev);
+    const nextDot  = document.getElementById('dot-' + currentPrompt);
+
+    if (prevCard) { prevCard.classList.remove('active'); prevCard.classList.add('exit-up'); }
+    if (prevDot)  prevDot.classList.remove('active');
+
+    setTimeout(() => {
+      if (prevCard) prevCard.classList.remove('exit-up');
+      if (nextCard) nextCard.classList.add('active');
+      if (nextDot)  nextDot.classList.add('active');
+    }, 80);
+  }
+
+  function startRotation() {
+    if (rotateTimer) clearInterval(rotateTimer);
+    rotateTimer = setInterval(() => showPrompt(currentPrompt + 1), ROTATE_MS);
+  }
+
+  // ── TICKER ────────────────────────────────────────────────────────────────
+  const tickerTrack = document.getElementById('tickerTrack');
+
+  function prependTicker(name, type, label, msg) {
+    // Add new item at the front of the ticker
+    const sep  = document.createElement('div');
+    sep.className = 'ticker-sep';
+
+    const item = document.createElement('div');
+    item.className = 'ticker-item';
+    item.innerHTML = `
+      <span class="ticker-type ${type}">${label}</span>
+      <span class="ticker-name">${name}</span>
+      ${msg ? `<span class="ticker-msg">${msg}</span>` : ''}`;
+
+    // Insert at the very front so it appears first
+    tickerTrack.insertBefore(sep,  tickerTrack.firstChild);
+    tickerTrack.insertBefore(item, tickerTrack.firstChild);
+  }
+
+  // ── BROADCAST CHANNEL LISTENER ────────────────────────────────────────────
+  channel.onmessage = (e) => {
+    const data = e.data;
+
+    switch (data.type) {
+
+      // Goal scored — flash the follow bar, add goal event to ticker
+      case 'homeGoal':
+      case 'awayGoal': {
+        flashGoalBar();
+        const scoringCode = data.type === 'homeGoal' ? data.homeCode : data.awayCode;
+        const isBarça     = data.isBarça;
+        const scoreLine   = data.homeScore + '–' + data.awayScore;
+        const label       = isBarça ? '⚽ GOOOL' : '⚽ GOAL';
+        const type        = 'goal';
+        prependTicker(
+          scoringCode,
+          type,
+          label,
+          scoreLine
+        );
+        break;
+      }
+
+      // Match phase changes — swap the active prompt set to match context
+      case 'kickoff':
+        showPrompt(0); // reset to first prompt on kickoff
+        break;
+
+      case 'ht':
+        // Rotate to HT-specific prompts — rate the half, MOTM etc
+        // These are already in the prompts array at indices 1 and 2
+        showPrompt(1);
+        break;
+
+      case 'secondHalf':
+        showPrompt(3); // score prediction prompt
+        break;
+
+      case 'ft':
+        showPrompt(2); // MOTM prompt on FT
+        break;
+    }
+  };
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  buildPrompts();
+  startRotation();
+  setFollowCount(0);
+</script>
+</body>
+</html>
