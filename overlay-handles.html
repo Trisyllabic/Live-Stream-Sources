@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Barca — Social Handles</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:  #004E98;
+    --red:   #A30032;
+    --sky:   #4d9fff;
+  }
+
+  /* Transparent body — Streamlabs sees only the two handle widgets */
+  body {
+    background: transparent;
+    /* Exact size: two handles side by side with scoreboard gap between.
+       In Streamlabs you add this as a single 1920×139 browser source
+       positioned at the very top of the scene, OR add each handle
+       as its own 241×139 source. See deployment notes at bottom. */
+    width: 1920px;
+    height: 139px;
+    overflow: hidden;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ════════════════════════════════════════════
+     HANDLE WIDGET — 241 × 139 px
+  ════════════════════════════════════════════ */
+  .handle-widget {
+    position: absolute;
+    top: 0;
+    width: 241px;
+    height: 139px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Left handle — flush with left edge */
+  .handle-widget.left  { left: 0; }
+
+  /* Right handle — flush with right edge */
+  .handle-widget.right { right: 0; }
+
+  /* ── BACKGROUND LAYERS ── */
+  .handle-bg {
+    position: absolute;
+    inset: 0;
+    background: #07080c;
+  }
+  .handle-glow-blue {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 0% 50%, rgba(0,78,152,0.48) 0%, transparent 68%);
+    pointer-events: none;
+  }
+  .handle-glow-red {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 100% 50%, rgba(163,0,50,0.38) 0%, transparent 68%);
+    pointer-events: none;
+  }
+  /* Brand split top bar */
+  .handle-top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--blue) 0%, var(--blue) 49.8%,
+      var(--red)  50.2%, var(--red)  100%
+    );
+    z-index: 10;
+  }
+  /* Bottom accent line */
+  .handle-bottom-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0,78,152,0.45) 30%,
+      rgba(163,0,50,0.45) 70%,
+      transparent
+    );
+    z-index: 10;
+  }
+  /* Bolt watermark */
+  .handle-bolt {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    height: 165%;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Noise texture */
+  .handle-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── CONTENT ── */
+  .handle-content {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 12px;
+  }
+
+  /* Instagram gradient ring */
+  .ig-icon-wrap {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+  .ig-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, #fcb045, #fd1d1d, #833ab4);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+  }
+  .ig-disc {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #0c1e3e, #050b18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ig-disc svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Handle text */
+  .handle-text {
+    text-align: center;
+    line-height: 1.1;
+  }
+  .handle-platform {
+    font-size: 0.5rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.32);
+    font-weight: 800;
+    margin-bottom: 3px;
+  }
+  .handle-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.18rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 18px rgba(77,159,255,0.38);
+  }
+  .handle-name .at {
+    color: var(--sky);
+    font-size: 0.88em;
+  }
+
+  /* ════════════════════════════════════════════
+     SLIDE ANIMATIONS
+  ════════════════════════════════════════════ */
+
+  /* Left handle slides in from the left */
+  @keyframes slideInLeft {
+    0%          { transform: translateX(-110%); opacity: 0; }
+    12%         { transform: translateX(0);     opacity: 1; }
+    80%         { transform: translateX(0);     opacity: 1; }
+    92%, 100%   { transform: translateX(-110%); opacity: 0; }
+  }
+
+  /* Right handle slides in from the right */
+  @keyframes slideInRight {
+    0%          { transform: translateX(110%);  opacity: 0; }
+    12%         { transform: translateX(0);     opacity: 1; }
+    80%         { transform: translateX(0);     opacity: 1; }
+    92%, 100%   { transform: translateX(110%);  opacity: 0; }
+  }
+
+  /* Icon glow pulse while visible */
+  @keyframes iconPulse {
+    0%,100% { filter: drop-shadow(0 0 6px  rgba(0,78,152,0.55)); }
+    50%     { filter: drop-shadow(0 0 16px rgba(0,78,152,0.95))
+                      drop-shadow(0 0 28px rgba(163,0,50,0.45)); }
+  }
+
+  .handle-widget.left {
+    animation: slideInLeft var(--cycle, 10s) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+  .handle-widget.right {
+    /* Slight delay so they don't arrive robotically in sync */
+    animation: slideInRight var(--cycle, 10s) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    animation-delay: 0.2s;
+  }
+  .handle-widget .ig-icon-wrap {
+    animation: iconPulse 3s ease-in-out infinite;
+    animation-delay: 0.9s;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ══ LEFT HANDLE — @atl.andy ══ -->
+  <div class="handle-widget left" id="leftHandle">
+    <div class="handle-bg"></div>
+    <div class="handle-glow-blue"></div>
+    <div class="handle-glow-red"></div>
+    <div class="handle-top-bar"></div>
+    <div class="handle-bottom-line"></div>
+    <div class="handle-noise"></div>
+
+    <svg class="handle-bolt" viewBox="0 0 120 200" fill="none" preserveAspectRatio="xMidYMid meet">
+      <path d="M85 8 L35 104 L62 104 L44 192 L98 92 L68 92 Z" fill="white"/>
+    </svg>
+
+    <div class="handle-content">
+      <div class="ig-icon-wrap">
+        <div class="ig-ring"></div>
+        <div class="ig-disc">
+          <svg viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="ig-l" x1="0" y1="24" x2="24" y2="0">
+                <stop offset="0%"   stop-color="#fcb045"/>
+                <stop offset="50%"  stop-color="#fd1d1d"/>
+                <stop offset="100%" stop-color="#833ab4"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig-l)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="handle-text">
+        <div class="handle-platform">Instagram</div>
+        <div class="handle-name"><span class="at">@</span>atl.andy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT HANDLE — @nfa.lamine ══ -->
+  <div class="handle-widget right" id="rightHandle">
+    <div class="handle-bg"></div>
+    <div class="handle-glow-blue"></div>
+    <div class="handle-glow-red"></div>
+    <div class="handle-top-bar"></div>
+    <div class="handle-bottom-line"></div>
+    <div class="handle-noise"></div>
+
+    <svg class="handle-bolt" viewBox="0 0 120 200" fill="none" preserveAspectRatio="xMidYMid meet">
+      <path d="M85 8 L35 104 L62 104 L44 192 L98 92 L68 92 Z" fill="white"/>
+    </svg>
+
+    <div class="handle-content">
+      <div class="ig-icon-wrap">
+        <div class="ig-ring"></div>
+        <div class="ig-disc">
+          <svg viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="ig-r" x1="0" y1="24" x2="24" y2="0">
+                <stop offset="0%"   stop-color="#fcb045"/>
+                <stop offset="50%"  stop-color="#fd1d1d"/>
+                <stop offset="100%" stop-color="#833ab4"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig-r)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="handle-text">
+        <div class="handle-platform">Instagram</div>
+        <div class="handle-name"><span class="at">@</span>nfa.lamine</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BroadcastChannel — hides handles during goal animation -->
+  <script>
+    const channel = new BroadcastChannel('beyond-barca-overlay');
+    const left    = document.getElementById('leftHandle');
+    const right   = document.getElementById('rightHandle');
+
+    // Read cycle duration from URL param ?cycle=10 (seconds), default 10s
+    const params   = new URLSearchParams(window.location.search);
+    const cycleSec = parseFloat(params.get('cycle') || '10');
+    left.style.setProperty('--cycle',  cycleSec + 's');
+    right.style.setProperty('--cycle', cycleSec + 's');
+
+    // Temporarily hide handles when a goal animation fires
+    // so they don't compete visually — they resume after 6s
+    let resumeTimer = null;
+    channel.onmessage = (e) => {
+      if (e.data.type === 'homeGoal' || e.data.type === 'awayGoal') {
+        left.style.animationPlayState  = 'paused';
+        right.style.animationPlayState = 'paused';
+        left.style.opacity  = '0';
+        right.style.opacity = '0';
+        if (resumeTimer) clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(() => {
+          left.style.animationPlayState  = 'running';
+          right.style.animationPlayState = 'running';
+          left.style.opacity  = '';
+          right.style.opacity = '';
+        }, 6000);
+      }
+    };
+  </script>
+
+</body>
+</html>

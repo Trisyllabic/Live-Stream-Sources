@@ -1,32 +1,105 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Twitch Scoreboard Sources</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beyond Barca — Stream Sources</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background: #090c16;
-      color: #f5f7ff;
-      padding: 24px;
-    }
-    a { color: #a8b8ff; }
-    code { background: #1b2036; padding: 2px 6px; border-radius: 6px; }
-    .card { background: #12172a; border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #07080c; color: #f0f2ff; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.6; padding: 40px 24px 80px; min-height: 100vh; }
+    h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
+    h1 span.blue { color: #004E98; } h1 span.red { color: #A30032; }
+    .subtitle { font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase; color: #3a3f4a; margin-bottom: 40px; }
+    .section-title { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: #3a3f4a; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .sources { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+    .card { background: #0e1118; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px; display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 16px; }
+    .card-title { font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 3px; }
+    .card-desc { font-size: 0.72rem; color: #5a6070; margin-bottom: 8px; }
+    .card-url { font-family: monospace; font-size: 0.72rem; background: #070a10; border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 5px 10px; color: #4d9fff; word-break: break-all; }
+    .card-specs { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .spec-pill { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; font-weight: 700; }
+    .spec-pill.size    { background: rgba(0,78,152,0.25);  color: #4d9fff;  border: 1px solid rgba(0,78,152,0.4); }
+    .spec-pill.transp  { background: rgba(255,255,255,0.05); color: #888;   border: 1px solid rgba(255,255,255,0.1); }
+    .spec-pill.updated { background: rgba(163,0,50,0.25);  color: #ff8899; border: 1px solid rgba(163,0,50,0.4); }
+    .spec-pill.new     { background: rgba(0,78,152,0.4);   color: #a8d4ff; border: 1px solid rgba(77,159,255,0.4); }
+    .css-block { background: #070a10; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 14px 16px; font-family: monospace; font-size: 0.72rem; color: #4d9fff; margin-top: 8px; }
+    .note { background: rgba(0,78,152,0.08); border: 1px solid rgba(0,78,152,0.2); border-radius: 8px; padding: 14px 18px; font-size: 0.75rem; color: #5a6070; margin-bottom: 20px; }
+    .note strong { color: rgba(255,255,255,0.5); }
+    a { color: #4d9fff; text-decoration: none; } a:hover { text-decoration: underline; }
+    code { background: #111520; padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
   </style>
 </head>
 <body>
-  <h1>Scoreboard Browser Sources</h1>
-  <div class="card">
-    <h2>Style A (dark/translucent)</h2>
-    <p><a href="./scoreboard-style-a.html">Open scoreboard-style-a.html</a></p>
+  <h1><span class="blue">Beyond</span> <span class="red">Barca</span> — Stream Sources</h1>
+  <div class="subtitle">Browser source reference · All files deploy from this repo</div>
+  <div class="note">
+    <strong>Custom CSS for every browser source:</strong> paste into the "Custom CSS" field in Streamlabs so backgrounds are transparent.
+    <div class="css-block">body { background: rgba(0,0,0,0) !important; }</div>
   </div>
-  <div class="card">
-    <h2>Style B (light pill with circular logo bubbles)</h2>
-    <p><a href="./scoreboard-style-b.html">Open scoreboard-style-b.html</a></p>
+  <div class="section-title">Scoreboard</div>
+  <div class="sources">
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Scoreboard — Style A</div>
+        <div class="card-desc">Main match scoreboard with control panel. Updated with BroadcastChannel sender — goal, HT, FT, kickoff all broadcast to overlay files.</div>
+        <div class="card-url"><a href="./scoreboard-style-a.html">scoreboard-style-a.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">241 × 139</span><span class="spec-pill updated">Updated</span></div>
+    </div>
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Scoreboard — Style B</div>
+        <div class="card-desc">Light pill variant. Uses the same scoreboard.js so BroadcastChannel works here too.</div>
+        <div class="card-url"><a href="./scoreboard-style-b.html">scoreboard-style-b.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">Auto</span></div>
+    </div>
   </div>
-  <p>Example URL params: <code>?home=FCB&away=RMA&homeScore=2&awayScore=1&time=73:42</code></p>
+  <div class="section-title">Overlay Sources — add each as a separate browser source in Streamlabs</div>
+  <div class="sources">
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Social Handles</div>
+        <div class="card-desc">@atl.andy (left) and @nfa.lamine (right) Instagram banners. Slide in from outer edges on a timed loop. Hides automatically during goal animations. Control cycle duration with <code>?cycle=10</code> (seconds).</div>
+        <div class="card-url"><a href="./overlay-handles.html">overlay-handles.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">1920 × 139</span><span class="spec-pill transp">Transparent</span><span class="spec-pill new">New</span></div>
+    </div>
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Goal Animation</div>
+        <div class="card-desc">Full-screen goal overlay. Fires on Home Goal / Away Goal clicks. Barça goal shows crest + blue particles. Rival goal shows ⚽ + red particles. Auto-dismisses after 5s. Add <code>assets/sounds/goal-crowd.mp3</code> for audio.</div>
+        <div class="card-url"><a href="./overlay-goal.html">overlay-goal.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">1920 × 1080</span><span class="spec-pill transp">Transparent</span><span class="spec-pill new">New</span></div>
+    </div>
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Bottom Bar</div>
+        <div class="card-desc">Prompt rotator (left) · follow goal tracker (centre) · alert ticker (right). Follow bar flashes gold on goals. Prompts auto-rotate and jump on KO / HT / 2H / FT. Edit <code>followCount</code> and <code>followGoal</code> in the file.</div>
+        <div class="card-url"><a href="./overlay-bottom-bar.html">overlay-bottom-bar.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">1920 × 80</span><span class="spec-pill transp">Transparent</span><span class="spec-pill new">New</span></div>
+    </div>
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Alert Popup</div>
+        <div class="card-desc">Follow / sub / bits popup with animated bolt. Trigger via console: <code>window.triggerAlert('follow', 'Name')</code> or URL: <code>?trigger=follow&amp;name=Name</code>. Re-broadcasts to bottom bar ticker. Sounds: <code>assets/sounds/follow-chime.mp3</code> · <code>sub-fanfare.mp3</code> · <code>bits-cheer.mp3</code></div>
+        <div class="card-url"><a href="./overlay-alerts.html">overlay-alerts.html</a></div>
+      </div>
+      <div class="card-specs"><span class="spec-pill size">1920 × 1080</span><span class="spec-pill transp">Transparent</span><span class="spec-pill new">New</span></div>
+    </div>
+  </div>
+  <div class="section-title">Assets needed — add to repo</div>
+  <div class="sources">
+    <div class="card">
+      <div class="card-left">
+        <div class="card-title">Sound Files</div>
+        <div class="card-desc">Drop royalty-free MP3s into <code>assets/sounds/</code>. Filenames must match exactly. Source from <a href="https://freesound.org" target="_blank">freesound.org</a> or <a href="https://pixabay.com/music" target="_blank">pixabay.com/music</a>.</div>
+        <div class="card-url">assets/sounds/goal-crowd.mp3 · assets/sounds/follow-chime.mp3 · assets/sounds/sub-fanfare.mp3 · assets/sounds/bits-cheer.mp3</div>
+      </div>
+      <div class="card-specs"><span class="spec-pill updated">Required</span></div>
+    </div>
+  </div>
 </body>
 </html>
