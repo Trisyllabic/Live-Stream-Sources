@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Barca — Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:    #004E98;
+    --red:     #A30032;
+    --sky:     #4d9fff;
+    --dark:    #07080c;
+  }
+
+  /* Transparent body — only the popup is visible in Streamlabs */
+  body {
+    background: transparent;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ══════════════════════════════════════════════
+     ALERT POPUP
+     Anchored bottom-right, grows upward with content
+  ══════════════════════════════════════════════ */
+  .alert-popup {
+    position: absolute;
+    bottom: 90px;   /* sits just above the bottom bar */
+    right: 20px;
+    width: 320px;
+    min-height: 72px;
+    border-radius: 10px;
+    overflow: hidden;
+
+    /* Slide in from right, scale up slightly */
+    transform: translateX(115%) scale(0.96);
+    opacity: 0;
+    transition:
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity   0.4s cubic-bezier(0.22, 1, 0.36, 1);
+
+    box-shadow:
+      0 8px 40px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+  }
+  .alert-popup.show {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+
+  /* ── TYPE MODIFIERS ── */
+  .alert-popup.sub  .popup-side-bar { background: var(--red); }
+  .alert-popup.bits .popup-side-bar { background: #ffd700; }
+  .alert-popup.sub  .popup-action   { color: #ff8899; }
+  .alert-popup.bits .popup-action   { color: #ffd700; }
+  .alert-popup.sub  .popup-icon-ring { border-color: var(--red); color: #ff8899; }
+
+  /* ── ANIMATED BACKGROUND ── */
+  .popup-anim-bg {
+    position: absolute;
+    inset: 0;
+    background: #06090f;
+    overflow: hidden;
+  }
+  .popup-anim-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(0,78,152,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(163,0,50,0.28) 0%, transparent 60%);
+  }
+
+  /* Bolt flash */
+  .popup-bolt-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    height: 220%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .popup-bolt-svg { height: 100%; width: auto; }
+
+  @keyframes boltFlash {
+    0%          { opacity: 0.06; filter: blur(2px); }
+    8%          { opacity: 0.55; filter: blur(0);   }
+    14%         { opacity: 0.12; filter: blur(1px); }
+    20%         { opacity: 0.48; filter: blur(0);   }
+    26%, 100%   { opacity: 0.06; filter: blur(2px); }
+  }
+  @keyframes boltGlow {
+    0%          { opacity: 0;   }
+    8%          { opacity: 0.7; }
+    14%         { opacity: 0.1; }
+    20%         { opacity: 0.5; }
+    26%, 100%   { opacity: 0;   }
+  }
+  @keyframes scanLine {
+    0%          { top: -4px;  opacity: 0;   }
+    8%          { top: -4px;  opacity: 0.5; }
+    20%         { top: 110%;  opacity: 0.4; }
+    22%, 100%   { opacity: 0; }
+  }
+  @keyframes iconWobble {
+    0%,7%,100%  { transform: rotate(0deg);  }
+    10%         { transform: rotate(8deg);  }
+    13%         { transform: rotate(-5deg); }
+    16%         { transform: rotate(0deg);  }
+  }
+  @keyframes spark1 { 0%{transform:translate(0,0) scale(0);opacity:0} 8%{transform:translate(-18px,-22px) scale(1);opacity:.9} 20%{transform:translate(-28px,-36px) scale(.4);opacity:0} 100%{opacity:0} }
+  @keyframes spark2 { 0%{transform:translate(0,0) scale(0);opacity:0} 8%{transform:translate(20px,-18px) scale(1);opacity:.8} 20%{transform:translate(32px,-28px) scale(.3);opacity:0} 100%{opacity:0} }
+  @keyframes spark3 { 0%{transform:translate(0,0) scale(0);opacity:0} 10%{transform:translate(14px,20px) scale(.9);opacity:.7} 22%{transform:translate(22px,32px) scale(.2);opacity:0} 100%{opacity:0} }
+  @keyframes spark4 { 0%{transform:translate(0,0) scale(0);opacity:0} 10%{transform:translate(-16px,16px) scale(.8);opacity:.6} 22%{transform:translate(-26px,26px) scale(.2);opacity:0} 100%{opacity:0} }
+
+  .bolt-flash      { animation: boltFlash 3.2s ease-in-out infinite; }
+  .bolt-glow-layer {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(77,159,255,0.6) 0%, transparent 55%);
+    animation: boltGlow 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .popup-scan {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(77,159,255,0.8), transparent);
+    pointer-events: none;
+    animation: scanLine 3.2s linear infinite;
+  }
+  .spark {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    transform-origin: center;
+  }
+  .spark:nth-child(1) { animation: spark1 3.2s ease-out infinite;        background: var(--sky); }
+  .spark:nth-child(2) { animation: spark2 3.2s ease-out infinite 0.05s;  background: #fff; }
+  .spark:nth-child(3) { animation: spark3 3.2s ease-out infinite 0.1s;   background: #ff4466; }
+  .spark:nth-child(4) { animation: spark4 3.2s ease-out infinite 0.07s;  background: var(--sky); }
+
+  /* ── CHROME ── */
+  .popup-top-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 2.5px;
+    background: linear-gradient(
+      90deg,
+      var(--blue) 0%, var(--blue) 49.8%,
+      var(--red)  50.2%, var(--red)  100%
+    );
+    z-index: 4;
+  }
+  .popup-side-bar {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--blue);
+    z-index: 4;
+    transition: background 0.3s;
+  }
+
+  /* ── CONTENT ── */
+  .popup-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px 14px 16px;
+  }
+
+  .popup-icon-ring {
+    flex: 0 0 38px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--blue);
+    background: radial-gradient(circle at 35% 30%, #0c1e3e, #050b18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--sky);
+    transition: border-color 0.3s, color 0.3s;
+    animation: iconWobble 3.2s ease-in-out infinite;
+    margin-top: 1px;
+  }
+
+  .popup-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .popup-action {
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sky);
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+  .popup-name {
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .popup-extra {
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    font-weight: 700;
+    line-height: 1.45;
+    /* Wraps freely — drives natural height growth */
+  }
+
+  /* ── AUDIO ── */
+  /* Sounds live in assets/sounds/
+     follow-chime.mp3  → short positive chime
+     sub-fanfare.mp3   → more dramatic, 2-3s
+     bits-cheer.mp3    → crowd cheer burst
+  */
+</style>
+</head>
+<body>
+
+  <div class="alert-popup" id="alertPopup">
+
+    <!-- Animated background -->
+    <div class="popup-anim-bg">
+      <div class="bolt-glow-layer"></div>
+      <div class="popup-scan"></div>
+      <div class="popup-bolt-wrap">
+        <svg class="popup-bolt-svg bolt-flash" viewBox="0 0 120 200" fill="none" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="bolt-grad" x1="60" y1="0" x2="60" y2="200" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stop-color="#4d9fff" stop-opacity="0.9"/>
+              <stop offset="40%"  stop-color="#ffffff" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#ff3366" stop-opacity="0.9"/>
+            </linearGradient>
+          </defs>
+          <path d="M85 8 L35 104 L62 104 L44 192 L98 92 L68 92 Z" fill="url(#bolt-grad)"/>
+        </svg>
+      </div>
+      <span class="spark"></span>
+      <span class="spark"></span>
+      <span class="spark"></span>
+      <span class="spark"></span>
+    </div>
+
+    <!-- Chrome -->
+    <div class="popup-top-bar"></div>
+    <div class="popup-side-bar" id="popupSideBar"></div>
+
+    <!-- Content -->
+    <div class="popup-content">
+      <div class="popup-icon-ring" id="popupIcon">BB</div>
+      <div class="popup-text">
+        <div class="popup-action"  id="popupAction">New Follower</div>
+        <div class="popup-name"    id="popupName">BeyondBarca</div>
+        <div class="popup-extra"   id="popupExtra">Welcome to the family! 🔵🔴</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── AUDIO ELEMENTS ── -->
+  <!-- Drop your sound files into assets/sounds/ — filenames must match exactly -->
+  <audio id="soundFollow" preload="auto">
+    <source src="assets/sounds/follow-chime.mp3"  type="audio/mpeg">
+  </audio>
+  <audio id="soundSub" preload="auto">
+    <source src="assets/sounds/sub-fanfare.mp3"   type="audio/mpeg">
+  </audio>
+  <audio id="soundBits" preload="auto">
+    <source src="assets/sounds/bits-cheer.mp3"    type="audio/mpeg">
+  </audio>
+
+<script>
+  // ── BROADCAST CHANNEL ─────────────────────────────────────────────────────
+  // Listens for events from scoreboard AND manual triggers.
+  // Also re-broadcasts follow/sub/bits so overlay-bottom-bar ticker picks them up.
+  const channel = new BroadcastChannel('beyond-barca-overlay');
+
+  // ── DOM REFS ─────────────────────────────────────────────────────────────
+  const popup       = document.getElementById('alertPopup');
+  const sideBar     = document.getElementById('popupSideBar');
+  const iconEl      = document.getElementById('popupIcon');
+  const actionEl    = document.getElementById('popupAction');
+  const nameEl      = document.getElementById('popupName');
+  const extraEl     = document.getElementById('popupExtra');
+  const soundFollow = document.getElementById('soundFollow');
+  const soundSub    = document.getElementById('soundSub');
+  const soundBits   = document.getElementById('soundBits');
+
+  let hideTimer = null;
+
+  // ── SHOW POPUP ────────────────────────────────────────────────────────────
+  function showAlert({ name, action, extra, type }) {
+    // Reset classes
+    popup.className   = 'alert-popup';
+    iconEl.className  = 'popup-icon-ring';
+    actionEl.className = 'popup-action';
+
+    // Apply type modifier
+    if (type === 'sub') {
+      popup.classList.add('sub');
+      sideBar.style.background = '#A30032';
+    } else if (type === 'bits') {
+      popup.classList.add('bits');
+      sideBar.style.background = '#ffd700';
+    } else {
+      sideBar.style.background = '#004E98';
+    }
+
+    // Fill content
+    iconEl.textContent  = name.slice(0, 2).toUpperCase();
+    actionEl.textContent = action;
+    nameEl.textContent  = name;
+    extraEl.textContent = extra;
+
+    // Show
+    popup.classList.add('show');
+
+    // Play sound — silent fail if file not yet added
+    const sounds = { follow: soundFollow, sub: soundSub, bits: soundBits };
+    const snd = sounds[type] || soundFollow;
+    snd.currentTime = 0;
+    snd.play().catch(() => {});
+
+    // Re-broadcast to ticker in overlay-bottom-bar.html
+    channel.postMessage({
+      type:       'alert_' + type,   // e.g. 'alert_follow', 'alert_sub', 'alert_bits'
+      alertName:  name,
+      alertExtra: extra,
+      alertType:  type
+    });
+
+    // Auto-dismiss after 5.5s
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideAlert, 5500);
+  }
+
+  function hideAlert() {
+    popup.classList.remove('show');
+  }
+
+  // ── LISTEN FOR INCOMING EVENTS ────────────────────────────────────────────
+  // This handles three sources:
+  //   1. Manual triggers from your own stream tools (URL params below)
+  //   2. Future Streamer.bot / Streamlabs webhook integration
+  //   3. Test triggers via URL params for testing in browser
+  channel.onmessage = (e) => {
+    const { type } = e.data;
+    // If scoreboard broadcasts a goal, dismiss any open alert so goal animation
+    // has the full screen
+    if (type === 'homeGoal' || type === 'awayGoal') {
+      hideAlert();
+    }
+  };
+
+  // ── URL PARAM TRIGGERS (for testing) ─────────────────────────────────────
+  // Open the file with ?trigger=follow&name=CulerForever to test
+  // Open with ?trigger=sub&name=BarçaBelievers&months=3 to test sub
+  // Open with ?trigger=bits&name=TragicMinded&amount=200 to test bits
+  (function checkUrlTrigger() {
+    const p = new URLSearchParams(window.location.search);
+    const trigger = p.get('trigger');
+    if (!trigger) return;
+
+    const name = p.get('name') || 'TestUser';
+
+    if (trigger === 'follow') {
+      showAlert({
+        name,
+        action: 'New Follower',
+        extra:  'Welcome to the family! 🔵🔴',
+        type:   'follow'
+      });
+    } else if (trigger === 'sub') {
+      const months = p.get('months') || '1';
+      showAlert({
+        name,
+        action: 'New Subscriber',
+        extra:  months + ' month' + (months !== '1' ? 's' : '') + ' — gracias!',
+        type:   'sub'
+      });
+    } else if (trigger === 'bits') {
+      const amount = p.get('amount') || '100';
+      showAlert({
+        name,
+        action: 'Bits Cheered!',
+        extra:  amount + ' bits — absolute legend!',
+        type:   'bits'
+      });
+    }
+  })();
+
+  // ── GLOBAL TRIGGER FUNCTION ───────────────────────────────────────────────
+  // Called by Streamlabs custom HTML widget or Streamer.bot via URL params.
+  // You can also call window.triggerAlert(...) from the browser console to test.
+  //
+  // Examples:
+  //   window.triggerAlert('follow', 'CulerForever99')
+  //   window.triggerAlert('sub',    'BarçaBelievers', '3 months — gracias!')
+  //   window.triggerAlert('bits',   'TragicMinded',   '200 bits — legend!')
+  window.triggerAlert = function(type, name, extra) {
+    const defaults = {
+      follow: { action: 'New Follower',   extra: 'Welcome to the family! 🔵🔴' },
+      sub:    { action: 'New Subscriber', extra: 'Thank you for the sub!'       },
+      bits:   { action: 'Bits Cheered!',  extra: 'Thank you for the bits!'      }
+    };
+    const def = defaults[type] || defaults.follow;
+    showAlert({
+      name:   name   || 'StreamViewer',
+      action: def.action,
+      extra:  extra  || def.extra,
+      type:   type   || 'follow'
+    });
+  };
+</script>
+</body>
+</html>
