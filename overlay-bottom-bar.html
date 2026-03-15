@@ -405,9 +405,11 @@
   const channel = new BroadcastChannel('beyond-barca-overlay');
 
   // ── FOLLOW GOAL STATE ─────────────────────────────────────────────────────
-  // Edit these two values to change the goal target and starting count
-  let followCount = 31;
-  const followGoal = 100;
+  // ★ EDIT THESE TWO VALUES BEFORE EACH STREAM ★
+  // followCount = your current real Twitch follower count
+  // followGoal  = your stream goal target
+  let followCount = 31;    // ← change to your real follower count e.g. 847
+  const followGoal = 100; // ← change to your stream goal e.g. 1000
 
   const followCurrentEl = document.getElementById('followCurrent');
   const followTotalEl   = document.getElementById('followTotal');
@@ -423,37 +425,39 @@
 
   function flashGoalBar() {
     followFillEl.classList.remove('goal-flash');
-    // Force reflow so re-adding the class restarts the animation
     void followFillEl.offsetWidth;
     followFillEl.classList.add('goal-flash');
     setTimeout(() => followFillEl.classList.remove('goal-flash'), 1600);
   }
 
-  // ════════════════════════════════════════════
-// EDIT YOUR PROMPTS HERE BEFORE EACH STREAM
-// Leave question: '' to skip that slot entirely
-// ════════════════════════════════════════════
+  // ── PROMPT ROTATOR ────────────────────────────────────────────────────────
+  // ★ EDIT PROMPTS HERE BEFORE EACH STREAM ★
+  // Leave question: '' to skip that prompt entirely — it won't show
+  // badge options: 'vote' (blue) | 'rate' (red) | 'predict' (gold) | 'chat' (light blue) | 'fact' (blue) | 'social' (light blue) | 'match' (gold)
+  const prompts = [
 
-const prompts = [
+    // ── MATCH CONTEXT — fill in before each game ──
+    { badge: 'match',   label: 'TODAY',   question: '',  cta: '' },  // e.g. 'Barça vs Real Madrid'
+    { badge: 'match',   label: 'VENUE',   question: '',  cta: '' },  // e.g. 'Camp Nou · 9:00 PM CET'
 
-  // ── MATCH CONTEXT ──
-  { badge: 'match',   label: 'TODAY',    question: 'Barça vs Sevilla',        cta: 'La Liga Matchday 28' },
-  { badge: 'match',   label: 'VENUE',    question: 'Camp Nou · Barcelona',         cta: 'Kick off 11:15 AM ET' },
+    // ── MATCH FACTS — fill in or leave empty ──
+    { badge: 'fact',    label: 'FACT',    question: '',  cta: '' },  // e.g. 'Last 5: Barça 4W 1D 0L'
+    { badge: 'fact',    label: 'FACT',    question: '',  cta: '' },  // e.g. 'Top scorer: Lewandowski 22'
 
-  // ── MATCH FACTS ──
-  { badge: 'fact',    label: 'FACT',     question: '',      cta: '' },
-  { badge: 'fact',    label: 'FACT',     question: '',      cta: '' },  // ← EMPTY = SKIPPED
+    // ── VIEWER INTERACTION ──
+    { badge: 'vote',    label: 'VOTE',    question: 'Who will score first?',        cta: 'Drop your pick in chat!' },
+    { badge: 'rate',    label: 'RATE',    question: 'Rate the half — 1 to 10',      cta: 'Type your number now' },
+    { badge: 'vote',    label: 'VOTE',    question: 'Who is Man of the Match?',     cta: 'Name your pick below!' },
+    { badge: 'predict', label: 'PREDICT', question: 'Score prediction?',            cta: 'What\'s the final score?' },
+    { badge: 'vote',    label: 'VOTE',    question: 'Barça clean sheet today?',     cta: 'YES or NO in chat!' },
+    { badge: 'vote',    label: 'VOTE',    question: 'Next goal before 70\'?',       cta: 'YES or NO — let\'s go!' },
 
-  // ── VIEWER INTERACTION ──
-  { badge: 'vote',    label: 'VOTE',     question: 'Who will score first?',        cta: 'Drop your pick in chat!' },
-  { badge: 'rate',    label: 'RATE',     question: 'Rate the half — 1 to 10',      cta: 'Type your number now' },
-  { badge: 'predict', label: 'PREDICT',  question: 'Score prediction?',            cta: 'What\'s the final score?' },
+    // ── SOCIAL / SCHEDULE — fill in or leave empty ──
+    { badge: 'social',  label: 'FOLLOW',  question: '@atl.andy on Instagram',       cta: 'Follow for more content!' },
+    { badge: 'social',  label: 'FOLLOW',  question: '@nfa.lamine on Instagram',     cta: 'Follow for more content!' },
+    { badge: 'social',  label: 'NEXT',    question: '',                             cta: '' },  // e.g. 'Next stream: Saturday 3PM ET'
 
-  // ── SOCIAL / SCHEDULE ──
-  { badge: 'social',  label: 'FOLLOW',   question: '@atl.andy on Instagram',       cta: 'Follow for more content!' },
-  { badge: 'social',  label: 'FOLLOW',   question: '@nfa.lamine on Instagram',     cta: 'Follow for more content!' },
-  { badge: 'social',  label: 'NEXT',     question: 'Next Stream - Barça vs Newcastle',      cta: 'Wed, March 18th - 1:45 PM ET' },  // ← fill in schedule
-];
+  ].filter(p => p.question.trim() !== ''); // ← empty prompts are automatically skipped
 
   let currentPrompt = 0;
   let rotateTimer   = null;
@@ -592,7 +596,7 @@ const prompts = [
   // ── INIT ──────────────────────────────────────────────────────────────────
   buildPrompts();
   startRotation();
-  setFollowCount(31);
+  setFollowCount(followCount); // uses the value you set at the top of this script
 </script>
 </body>
 </html>
