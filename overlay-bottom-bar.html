@@ -429,17 +429,31 @@
     setTimeout(() => followFillEl.classList.remove('goal-flash'), 1600);
   }
 
-  // ── PROMPT ROTATOR ────────────────────────────────────────────────────────
-  const prompts = [
-    { badge: 'vote',    label: 'VOTE',    question: 'Who will score next?',        cta: 'Drop your prediction in chat!' },
-    { badge: 'rate',    label: 'RATE',    question: 'Rate the half — 1 to 10',     cta: 'Type your number in chat now' },
-    { badge: 'vote',    label: 'VOTE',    question: 'Who is Man of the Match?',    cta: 'Name your pick below!' },
-    { badge: 'predict', label: 'PREDICT', question: 'Score prediction?',           cta: 'What\'s the final score?' },
-    { badge: 'chat',    label: 'CHAT',    question: 'Barça clean sheet today?',    cta: 'YES or NO in chat!' },
-    { badge: 'rate',    label: 'RATE',    question: 'Rate Pedri\'s performance',   cta: '1–10 in chat right now' },
-    { badge: 'vote',    label: 'VOTE',    question: 'Next goal before 70\'?',      cta: 'YES or NO — let\'s go!' },
-    { badge: 'chat',    label: 'CHAT',    question: 'Best goal you\'ve seen live?', cta: 'Tell us in chat!' },
-  ];
+  // ════════════════════════════════════════════
+// EDIT YOUR PROMPTS HERE BEFORE EACH STREAM
+// Leave question: '' to skip that slot entirely
+// ════════════════════════════════════════════
+
+const prompts = [
+
+  // ── MATCH CONTEXT ──
+  { badge: 'match',   label: 'TODAY',    question: 'Barça vs Sevilla',        cta: 'La Liga Matchday 28' },
+  { badge: 'match',   label: 'VENUE',    question: 'Camp Nou · Barcelona',         cta: 'Kick off 11:15 AM ET' },
+
+  // ── MATCH FACTS ──
+  { badge: 'fact',    label: 'FACT',     question: '',      cta: '' },
+  { badge: 'fact',    label: 'FACT',     question: '',      cta: '' },  // ← EMPTY = SKIPPED
+
+  // ── VIEWER INTERACTION ──
+  { badge: 'vote',    label: 'VOTE',     question: 'Who will score first?',        cta: 'Drop your pick in chat!' },
+  { badge: 'rate',    label: 'RATE',     question: 'Rate the half — 1 to 10',      cta: 'Type your number now' },
+  { badge: 'predict', label: 'PREDICT',  question: 'Score prediction?',            cta: 'What\'s the final score?' },
+
+  // ── SOCIAL / SCHEDULE ──
+  { badge: 'social',  label: 'FOLLOW',   question: '@atl.andy on Instagram',       cta: 'Follow for more content!' },
+  { badge: 'social',  label: 'FOLLOW',   question: '@nfa.lamine on Instagram',     cta: 'Follow for more content!' },
+  { badge: 'social',  label: 'NEXT',     question: 'Next Stream - Barça vs Newcastle',      cta: 'Wed, March 18th - 1:45 PM ET' },  // ← fill in schedule
+];
 
   let currentPrompt = 0;
   let rotateTimer   = null;
